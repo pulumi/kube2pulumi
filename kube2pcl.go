@@ -17,24 +17,9 @@ metadata:
 
 `
 
-func getMetaName(nodes []ast.Node) string {
-	for _, node := range nodes {
-		if node.(*ast.MappingValueNode).Key.String() == "metadata" {
-			if node.(*ast.MappingValueNode).Value.Type() == ast.StringType {
-				return node.(*ast.MappingValueNode).Value.String()
-			} else {
-				for _, inner := range ast.Filter(ast.MappingValueType, node) {
-					if inner.(*ast.MappingValueNode).Key.String() == "name" {
-						return inner.(*ast.MappingValueNode).Value.String()
-					}
-				}
-			}
-		}
-	}
-	return ""
-}
-
-// resource <metadata/name> “kubernetes : <apiVersion>: <kind>” {
+/**
+resource <metadata/name> “kubernetes : <apiVersion>: <kind>”
+*/
 func printHeader(nodes []ast.Node) {
 	var apiVersion string
 	for _, node := range nodes {
@@ -61,19 +46,29 @@ func printHeader(nodes []ast.Node) {
 	fmt.Print(header)
 }
 
-func main() {
-	testFiles, err := parser.ParseBytes([]byte(testData), parser.ParseComments)
-	if err != nil {
-		fmt.Println(err)
+/**
+returns <metadata/name> field as a string from AST
+*/
+func getMetaName(nodes []ast.Node) string {
+	for _, node := range nodes {
+		if node.(*ast.MappingValueNode).Key.String() == "metadata" {
+			if node.(*ast.MappingValueNode).Value.Type() == ast.StringType {
+				return node.(*ast.MappingValueNode).Value.String()
+			} else {
+				for _, inner := range ast.Filter(ast.MappingValueType, node) {
+					if inner.(*ast.MappingValueNode).Key.String() == "name" {
+						return inner.(*ast.MappingValueNode).Value.String()
+					}
+				}
+			}
+		}
 	}
-	var v Visitor
-	for _, doc := range testFiles.Docs {
-		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		printHeader(baseNodes)
-		walkToPCL(v, doc.Body)
-	}
+	return ""
 }
 
+/**
+converts data within specified node to PCL
+*/
 func nodeToPCL(node ast.Node, tk *token.Token) {
 	if node.Type() == ast.MappingType {
 		fmt.Println("{")
@@ -104,11 +99,13 @@ func nodeToPCL(node ast.Node, tk *token.Token) {
 	}
 }
 
-// walktoPCL traverses an AST in depth-first order and prints out the corresponding PCL code:
-// Starts by calling v.Visit(node); node must not be nil.
-// If the visitor w returned by v.Visit(node) is not nil,
-// walktoPCL is invoked recursively with visitor w for each of the non-nil children of node,
-// followed by a call of w.Visit(nil).
+/**
+walkToPCL traverses an AST in depth-first order and prints out the corresponding PCL code:
+Starts by calling v.Visit(node); node must not be nil.
+If the visitor w returned by v.Visit(node) is not nil,
+walkToPCL is invoked recursively with visitor w for each of the non-nil children of node,
+followed by a call of w.Visit(nil).
+*/
 func walkToPCL(v Visitor, node ast.Node) {
 	if v := v.Visit(node); v == nil {
 		return
@@ -150,6 +147,22 @@ func walkToPCL(v Visitor, node ast.Node) {
 		walkToPCL(v, n.Value)
 	case *ast.AliasNode:
 		walkToPCL(v, n.Value)
+	}
+}
+
+/**
+converts YAML defined in the testData field to PCL and prints it out
+*/
+func main() {
+	testFiles, err := parser.ParseBytes([]byte(testData), parser.ParseComments)
+	if err != nil {
+		fmt.Println(err)
+	}
+	var v Visitor
+	for _, doc := range testFiles.Docs {
+		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
+		printHeader(baseNodes)
+		walkToPCL(v, doc.Body)
 	}
 }
 
