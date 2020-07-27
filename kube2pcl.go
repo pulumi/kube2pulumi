@@ -11,18 +11,9 @@ import (
 var testData = `
 
 apiVersion: v1
-kind: Pod
+kind: Namespace
 metadata:
-  namespace: foo
-  name: bar
-spec:
-  containers:
-    - name: nginx
-      image: nginx:1.14-alpine
-      resources:
-        limits:
-          memory: 20Mi
-          cpu: 0.2
+  name: foo
 
 `
 
@@ -66,8 +57,8 @@ func printHeader(nodes []ast.Node) {
 		}
 	}
 
-	header := strings.Join([]string{"resource ", metaName, " \"kubernetes:", apiVersion, ":", kind, "\"", " {"}, "")
-	fmt.Println(header)
+	header := strings.Join([]string{"resource ", metaName, " \"kubernetes:", apiVersion, ":", kind, "\" "}, "")
+	fmt.Print(header)
 }
 
 func main() {
@@ -81,18 +72,21 @@ func main() {
 		printHeader(baseNodes)
 		walkToPCL(v, doc.Body)
 	}
-	fmt.Println("}")
 }
 
 func nodeToPCL(node ast.Node, tk *token.Token) {
+	if node.Type() == ast.MappingType {
+		fmt.Println("{")
+	}
 	if node.Type() == ast.MappingValueType {
 		mapNode := node.(*ast.MappingValueNode)
+
 		fmt.Print(mapNode.Key, " = ")
-		if mapNode.Value.Type() == ast.MappingType || mapNode.Value.Type() == ast.MappingValueType {
+		if mapNode.Value.Type() == ast.MappingValueType {
 			fmt.Println("{")
 		}
 		if mapNode.Value.Type() == ast.SequenceType {
-			fmt.Println("[\n{")
+			fmt.Println("[")
 		}
 	}
 	if node.Type() == ast.StringType && (tk.Next == nil || tk.Next.Value != ":") {
@@ -143,11 +137,14 @@ func walkToPCL(v Visitor, node ast.Node) {
 	case *ast.MappingValueNode:
 		walkToPCL(v, n.Key)
 		walkToPCL(v, n.Value)
+		if n.Value.Type() == ast.MappingValueType {
+			fmt.Println("}")
+		}
 	case *ast.SequenceNode:
 		for _, value := range n.Values {
 			walkToPCL(v, value)
 		}
-		fmt.Println("}\n]")
+		fmt.Println("]")
 	case *ast.AnchorNode:
 		walkToPCL(v, n.Name)
 		walkToPCL(v, n.Value)
