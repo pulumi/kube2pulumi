@@ -2,25 +2,15 @@ package main
 
 import (
 	"fmt"
-	"kube2pulumi/yaml2pcl"
+	"github.com/pulumi/kube2pulumi/yaml2pcl"
 )
 
 var testData = `
 
 apiVersion: v1
-kind: Pod
-# this is a test comment
+kind: Namespace
 metadata:
-  namespace: foo
-  name: bar
-spec:
-  containers:
-    - name: nginx
-      image: nginx:1.14-alpine
-      resources:
-        limits:
-          memory: 20Mi
-          cpu: 0.2
+	name: foo
 
 `
 
