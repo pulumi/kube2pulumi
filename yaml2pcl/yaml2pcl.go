@@ -3,10 +3,12 @@
 package yaml2pcl
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
+	"io"
 	"strings"
 )
 
@@ -24,14 +26,7 @@ func Convert(input []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var pcl string
-	var v Visitor
-	for _, doc := range testFiles.Docs {
-		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		pcl += getHeader(baseNodes)
-		pcl = walkToPCL(v, doc.Body, pcl)
-	}
-	return pcl, err
+	return convert(*testFiles)
 }
 
 // ConvertFile returns a string conversion of the input YAML
@@ -48,14 +43,26 @@ func ConvertFile(filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var pcl string
+	return convert(*testFiles)
+}
+
+func convert(testFiles ast.File) (string, error) {
 	var v Visitor
+	var buff bytes.Buffer
+	var err error
+
 	for _, doc := range testFiles.Docs {
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		pcl += getHeader(baseNodes)
-		pcl = walkToPCL(v, doc.Body, pcl)
+		_, err = fmt.Fprint(&buff, getHeader(baseNodes))
+		if err != nil {
+			return "", err
+		}
+		err = walkToPCL(v, doc.Body, &buff)
+		if err != nil {
+			return "", err
+		}
 	}
-	return pcl, err
+	return buff.String(), err
 }
 
 // resource <metadata/name> “kubernetes : <apiVersion>: <kind>”
@@ -112,75 +119,138 @@ func getMetaName(nodes []ast.Node) string {
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
-func walkToPCL(v Visitor, node ast.Node, totalPCL string) string {
+func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 	if v := v.Visit(node); v == nil {
-		return ""
+		return nil
 	}
 
+	var err error
 	tk := node.GetToken()
 	/**
 	check for comments here in order to add to the PCL string
 	*/
 	if comment := node.GetComment(); comment != nil {
-		totalPCL += comment.Value
+		_, err = totalPCL.Write([]byte(comment.Value))
+		if err != nil {
+			return err
+		}
 	}
-
 	switch n := node.(type) {
 	case *ast.NullNode:
 	case *ast.IntegerNode:
-		totalPCL += node.String() + "\n"
+		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		if err != nil {
+			return err
+		}
 	case *ast.FloatNode:
-		totalPCL += node.String() + "\n"
+		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		if err != nil {
+			return err
+		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			totalPCL += strings.Join([]string{"\"", n.String(), "\"", "\n"}, "")
+			strVal := fmt.Sprintf("%s%s%s\n", "\"", n.String(), "\"")
+			_, err = totalPCL.Write([]byte(strVal))
+			if err != nil {
+				return err
+			}
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
-		totalPCL += node.String() + "\n"
+		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		if err != nil {
+			return err
+		}
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
-		totalPCL = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL)
+		if err != nil {
+			return err
+		}
 	case *ast.DocumentNode:
-		totalPCL = walkToPCL(v, n.Body, totalPCL)
+		err = walkToPCL(v, n.Body, totalPCL)
+		if err != nil {
+			return err
+		}
 	case *ast.MappingNode:
-		totalPCL += "{\n"
+		_, err = totalPCL.Write([]byte("{\n"))
 		for _, value := range n.Values {
-			totalPCL = walkToPCL(v, value, totalPCL)
+			err = walkToPCL(v, value, totalPCL)
+			if err != nil {
+				return err
+			}
 		}
-		totalPCL += "}\n"
+		_, err = totalPCL.Write([]byte("}\n"))
+		if err != nil {
+			return err
+		}
 	case *ast.MappingKeyNode:
-		totalPCL = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL)
+		if err != nil {
+			return err
+		}
 	case *ast.MappingValueNode:
-		totalPCL += n.Key.String() + " = "
+		_, err = totalPCL.Write([]byte(n.Key.String() + " = "))
+		if err != nil {
+			return err
+		}
 		if n.Value.Type() == ast.MappingValueType {
-			totalPCL += "{\n"
+			_, err = totalPCL.Write([]byte("{\n"))
+			if err != nil {
+				return err
+			}
 		} else if n.Value.Type() == ast.SequenceType {
-			totalPCL += "[\n"
+			_, err = totalPCL.Write([]byte("[\n"))
+			if err != nil {
+				return err
+			}
 		}
 
-		totalPCL = walkToPCL(v, n.Key, totalPCL)
-		totalPCL = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Key, totalPCL)
+		if err != nil {
+			return err
+		}
+		err = walkToPCL(v, n.Value, totalPCL)
+		if err != nil {
+			return err
+		}
 
 		if n.Value.Type() == ast.MappingValueType {
-			totalPCL += "}\n"
+			_, err = totalPCL.Write([]byte("}\n"))
+			if err != nil {
+				return err
+			}
 		}
 	case *ast.SequenceNode:
 		for _, value := range n.Values {
-			totalPCL = walkToPCL(v, value, totalPCL)
+			err = walkToPCL(v, value, totalPCL)
+			if err != nil {
+				return err
+			}
 		}
-		totalPCL += "]\n"
+		_, err = totalPCL.Write([]byte("]\n"))
+		if err != nil {
+			return err
+		}
 	case *ast.AnchorNode:
-		totalPCL = walkToPCL(v, n.Name, totalPCL)
-		totalPCL = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Name, totalPCL)
+		if err != nil {
+			return err
+		}
+		err = walkToPCL(v, n.Value, totalPCL)
+		if err != nil {
+			return err
+		}
 	case *ast.AliasNode:
-		totalPCL = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL)
+		if err != nil {
+			return err
+		}
 	default:
-		return errors.New("unexpected node type").Error()
+		return errors.New("unexpected node type: " + n.Type().String())
 	}
-
-	return totalPCL
+	return nil
 }
 
 type Visitor struct {
