@@ -8,19 +8,11 @@ import (
 	"os"
 )
 
-var testData = `
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: foo
-
-`
-
 /**
-converts YAML defined in the testData field to PCL and prints it out
+converts YAML defined in the testData field to PCL and writes it to a temp .pp file
 */
 func main() {
-	result, err := yaml2pcl.Convert([]byte(testData))
+	result, err := yaml2pcl.ConvertFile("conversionTest.yaml")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -31,7 +23,7 @@ func main() {
 	}
 
 	// ensure to clean up the file
-	defer os.Remove(tempFile.Name())
+	err = os.Remove(tempFile.Name())
 	fmt.Println("created the file: ", tempFile.Name())
 
 	// Write to the file
@@ -40,12 +32,12 @@ func main() {
 		log.Fatal("Failed to write to temporary file", err)
 	}
 
-	// test printing out file contents
-	out, err := ioutil.ReadFile(tempFile.Name())
-	fmt.Println(string(out))
-
 	// Close the file
 	if err := tempFile.Close(); err != nil {
 		log.Fatal(err)
 	}
+
+	// test printing out file contents
+	//out, err := ioutil.ReadFile(tempFile.Name())
+	//fmt.Println("TEMP FILE CONTENTS \n\n" + string(out))
 }
