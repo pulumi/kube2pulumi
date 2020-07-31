@@ -3,6 +3,8 @@
 package yaml2pcl
 
 import (
+	"errors"
+	"fmt"
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
 	"strings"
@@ -32,6 +34,30 @@ func Convert(input []byte) (string, error) {
 	return pcl, err
 }
 
+// ConvertFile returns a string conversion of the input YAML
+// in a file into PCL: sample below
+// Output: resource foo "kubernetes:core/v1:Namespace" {
+// apiVersion = "v1"
+// kind = "Namespace"
+// metadata = {
+// name = "foo"
+// }
+// }
+func ConvertFile(filename string) (string, error) {
+	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
+	if err != nil {
+		return "", err
+	}
+	var pcl string
+	var v Visitor
+	for _, doc := range testFiles.Docs {
+		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
+		pcl += getHeader(baseNodes)
+		pcl = walkToPCL(v, doc.Body, pcl)
+	}
+	return pcl, err
+}
+
 // resource <metadata/name> “kubernetes : <apiVersion>: <kind>”
 func getHeader(nodes []ast.Node) string {
 	var apiVersion string
@@ -42,7 +68,7 @@ func getHeader(nodes []ast.Node) string {
 		}
 	}
 	if !strings.Contains(apiVersion, "/") {
-		apiVersion = "core/" + apiVersion
+		apiVersion = fmt.Sprintf("%s%s", "core/", apiVersion)
 	}
 
 	metaName := getMetaName(nodes)
@@ -55,7 +81,7 @@ func getHeader(nodes []ast.Node) string {
 		}
 	}
 
-	header := strings.Join([]string{"resource ", metaName, " \"kubernetes:", apiVersion, ":", kind, "\" "}, "")
+	header := fmt.Sprintf("%s%s%s%s%s%s%s", "resource ", metaName, " \"kubernetes:", apiVersion, ":", kind, "\" ")
 	return header
 }
 
@@ -142,7 +168,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL string) string {
 		totalPCL = walkToPCL(v, n.Value, totalPCL)
 	case *ast.AliasNode:
 		totalPCL = walkToPCL(v, n.Value, totalPCL)
+	default:
+		return errors.New("unexpected node type").Error()
 	}
+
 	return totalPCL
 }
 
@@ -158,6 +187,5 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	}
 
 	tk.Prev = nil
-
 	return v
 }
