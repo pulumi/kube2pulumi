@@ -23,7 +23,7 @@ func main() {
 	}
 
 	// ensure to clean up the file
-	err = os.Remove(tempFile.Name())
+	defer os.Remove(tempFile.Name())
 	fmt.Println("created the file: ", tempFile.Name())
 
 	// Write to the file
