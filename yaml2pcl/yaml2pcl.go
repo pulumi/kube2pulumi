@@ -62,9 +62,11 @@ func ConvertFile(filename string) (string, error) {
 func getHeader(nodes []ast.Node) string {
 	var apiVersion string
 	for _, node := range nodes {
-		if node.(*ast.MappingValueNode).Key.String() == "apiVersion" {
-			apiVersion = node.(*ast.MappingValueNode).Value.String()
-			break
+		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
+			if mapValNode.Key.String() == "apiVersion" {
+				apiVersion = mapValNode.Value.String()
+				break
+			}
 		}
 	}
 	if !strings.Contains(apiVersion, "/") {
@@ -75,9 +77,11 @@ func getHeader(nodes []ast.Node) string {
 
 	var kind string
 	for _, node := range nodes {
-		if node.(*ast.MappingValueNode).Key.String() == "kind" {
-			kind = node.(*ast.MappingValueNode).Value.String()
-			break
+		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
+			if mapValNode.Key.String() == "kind" {
+				kind = mapValNode.Value.String()
+				break
+			}
 		}
 	}
 
@@ -88,13 +92,17 @@ func getHeader(nodes []ast.Node) string {
 // returns <metadata/name> field as a string from AST
 func getMetaName(nodes []ast.Node) string {
 	for _, node := range nodes {
-		if node.(*ast.MappingValueNode).Key.String() == "metadata" {
-			if node.(*ast.MappingValueNode).Value.Type() == ast.StringType {
-				return node.(*ast.MappingValueNode).Value.String()
-			} else {
-				for _, inner := range ast.Filter(ast.MappingValueType, node) {
-					if inner.(*ast.MappingValueNode).Key.String() == "name" {
-						return inner.(*ast.MappingValueNode).Value.String()
+		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
+			if mapValNode.Key.String() == "metadata" {
+				if mapValNode.Value.Type() == ast.StringType {
+					return node.(*ast.MappingValueNode).Value.String()
+				} else {
+					for _, inner := range ast.Filter(ast.MappingValueType, node) {
+						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
+							if innerMvNode.Key.String() == "name" {
+								return innerMvNode.Value.String()
+							}
+						}
 					}
 				}
 			}
