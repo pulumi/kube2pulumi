@@ -102,7 +102,7 @@ func getMetaName(nodes []ast.Node) string {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
 			if mapValNode.Key.String() == "metadata" {
 				if mapValNode.Value.Type() == ast.StringType {
-					return node.(*ast.MappingValueNode).Value.String()
+					return mapValNode.Value.String()
 				} else {
 					for _, inner := range ast.Filter(ast.MappingValueType, node) {
 						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
