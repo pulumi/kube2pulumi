@@ -18,6 +18,7 @@ func GeneratePulumi(pcl string, yamlName string, ext string) {
 	//get original file name
 	fileName := strings.Split(yamlName, ".")[0]
 	convertPulumi(pclFile, fileName, ext)
+	// refer to comment on line 27 for the following:
 	//os.Remove(pclFile.Name())
 }
 
