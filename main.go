@@ -17,8 +17,8 @@ func main() {
 	}
 
 	// output format options are "nodejs", "python", "dotnet", "go"
-	pcl2pulumi.PclString2Pulumi(result, filePath, "nodejs")
-	pcl2pulumi.PclString2Pulumi(result, filePath, "python")
-	pcl2pulumi.PclString2Pulumi(result, filePath, "dotnet")
-	pcl2pulumi.PclString2Pulumi(result, filePath, "go")
+	pcl2pulumi.Pcl2Pulumi(result, filePath, "nodejs")
+	pcl2pulumi.Pcl2Pulumi(result, filePath, "python")
+	pcl2pulumi.Pcl2Pulumi(result, filePath, "dotnet")
+	pcl2pulumi.Pcl2Pulumi(result, filePath, "go")
 }
