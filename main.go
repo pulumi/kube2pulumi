@@ -6,34 +6,19 @@ import (
 	"github.com/pulumi/kube2pulumi/yaml2pcl"
 )
 
-/**
-converts YAML defined in the testData field to PCL and writes it to a temp .pp file
-*/
+// converts a single YAML file (@filepath) to a various pulumi files
+// ("nodejs", "python", "dotnet", "go") in the same directory
 func main() {
-	fileName := "conversionTest.yaml"
-	result, err := yaml2pcl.ConvertFile(fileName)
+	filePath := "conversionTest.yaml"
+	result, err := yaml2pcl.ConvertFile(filePath)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	// open comments:
-	// passing the correct extension should be taken care of by the CLI
-	// should a pointer to the proper codegen tool also be passed.... e.g. something similar to
-	/**
-	var generateProgram func(program *hcl2.Program) (map[string][]byte, hcl.Diagnostics, error)
-	switch target {
-	case "dotnet":
-		generateProgram = csgen.GenerateProgram
-	case "go":
-		generateProgram = gogen.GenerateProgram
-	case "nodejs":
-		generateProgram = tsgen.GenerateProgram
-	case "python":
-		generateProgram = pygen.GenerateProgram
-	default:
-		flag.Usage()
-		os.Exit(1)
-	}
-	*/
-	pcl2pulumi.GeneratePulumi(result, fileName, ".ts")
+
+	// output format options are "nodejs", "python", "dotnet", "go"
+	pcl2pulumi.PclString2Pulumi(result, filePath, "nodejs")
+	pcl2pulumi.PclString2Pulumi(result, filePath, "python")
+	pcl2pulumi.PclString2Pulumi(result, filePath, "dotnet")
+	pcl2pulumi.PclString2Pulumi(result, filePath, "go")
 }
