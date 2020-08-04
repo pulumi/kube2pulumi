@@ -23,12 +23,12 @@ foo = kubernetes.core_v1.Namespace("foo",
         "name": "foo",
     })
 `
-	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "python")
+	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "python")
 	if err != nil {
 		return
 	}
-	py, _ := ioutil.ReadFile("test/data/Namespace.py")
+	py, _ := ioutil.ReadFile("testdata/Namespace.py")
 	assert.Equal(t, pyExpected, string(py))
 }
 
@@ -48,12 +48,12 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
     },
 });
 `
-	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "nodejs")
+	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "nodejs")
 	if err != nil {
 		return
 	}
-	ts, _ := ioutil.ReadFile("test/data/Namespace.ts")
+	ts, _ := ioutil.ReadFile("testdata/Namespace.ts")
 	assert.Equal(t, tsExpected, string(ts))
 }
 
@@ -82,12 +82,12 @@ class MyStack : Stack
 
 }
 `
-	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "dotnet")
+	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "dotnet")
 	if err != nil {
 		return
 	}
-	cs, _ := ioutil.ReadFile("test/data/Namespace.cs")
+	cs, _ := ioutil.ReadFile("testdata/Namespace.cs")
 	assert.Equal(t, csExpected, string(cs))
 }
 
@@ -119,11 +119,11 @@ func main() {
 	})
 }
 `
-	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "go")
+	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "go")
 	if err != nil {
 		return
 	}
-	_go, _ := ioutil.ReadFile("test/data/Namespace.go")
+	_go, _ := ioutil.ReadFile("testdata/Namespace.go")
 	assert.Equal(t, goExpected, string(_go))
 }
