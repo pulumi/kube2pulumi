@@ -22,7 +22,7 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("test/data/Namespace.yaml")
+	result, err := ConvertFile("testdata/Namespace.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
@@ -42,7 +42,7 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("test/data/NamespaceWithComments.yaml")
+	result, err := ConvertFile("testdata/NamespaceWithComments.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
@@ -76,7 +76,7 @@ cpu = 0.2
 }
 }
 `
-	result, err := ConvertFile("test/data/OnePodArray.yaml")
+	result, err := ConvertFile("testdata/OnePodArray.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
