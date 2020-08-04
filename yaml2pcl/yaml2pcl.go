@@ -65,7 +65,7 @@ func convert(testFiles ast.File) (string, error) {
 	return buff.String(), err
 }
 
-// resource <metadata/name> “kubernetes : <apiVersion>: <kind>”
+// resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
 func getHeader(nodes []ast.Node) string {
 	var apiVersion string
 	for _, node := range nodes {
@@ -77,7 +77,7 @@ func getHeader(nodes []ast.Node) string {
 		}
 	}
 	if !strings.Contains(apiVersion, "/") {
-		apiVersion = fmt.Sprintf("%s%s", "core/", apiVersion)
+		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
 
 	metaName := getMetaName(nodes)
@@ -91,8 +91,7 @@ func getHeader(nodes []ast.Node) string {
 			}
 		}
 	}
-
-	header := fmt.Sprintf("%s%s%s%s%s%s%s", "resource ", metaName, " \"kubernetes:", apiVersion, ":", kind, "\" ")
+	header := fmt.Sprintf("resource %s \"kubernetes:%s:%s\" ", metaName, apiVersion, kind)
 	return header
 }
 
@@ -130,7 +129,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 	check for comments here in order to add to the PCL string
 	*/
 	if comment := node.GetComment(); comment != nil {
-		_, err = totalPCL.Write([]byte(comment.Value))
+		_, err = fmt.Fprintf(totalPCL, "%s", comment.Value)
 		if err != nil {
 			return err
 		}
@@ -138,26 +137,26 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 	switch n := node.(type) {
 	case *ast.NullNode:
 	case *ast.IntegerNode:
-		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.FloatNode:
-		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			strVal := fmt.Sprintf("%s%s%s\n", "\"", n.String(), "\"")
-			_, err = totalPCL.Write([]byte(strVal))
+			strVal := fmt.Sprintf("\"%s\"\n", n.String())
+			_, err = fmt.Fprintf(totalPCL, "%s", strVal)
 			if err != nil {
 				return err
 			}
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
-		_, err = totalPCL.Write([]byte(node.String() + "\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
@@ -174,14 +173,14 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 			return err
 		}
 	case *ast.MappingNode:
-		_, err = totalPCL.Write([]byte("{\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 		for _, value := range n.Values {
 			err = walkToPCL(v, value, totalPCL)
 			if err != nil {
 				return err
 			}
 		}
-		_, err = totalPCL.Write([]byte("}\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", "}")
 		if err != nil {
 			return err
 		}
@@ -191,17 +190,17 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 			return err
 		}
 	case *ast.MappingValueNode:
-		_, err = totalPCL.Write([]byte(n.Key.String() + " = "))
+		_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
 		if err != nil {
 			return err
 		}
 		if n.Value.Type() == ast.MappingValueType {
-			_, err = totalPCL.Write([]byte("{\n"))
+			_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 			if err != nil {
 				return err
 			}
 		} else if n.Value.Type() == ast.SequenceType {
-			_, err = totalPCL.Write([]byte("[\n"))
+			_, err = fmt.Fprintf(totalPCL, "%s\n", "[")
 			if err != nil {
 				return err
 			}
@@ -217,7 +216,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 		}
 
 		if n.Value.Type() == ast.MappingValueType {
-			_, err = totalPCL.Write([]byte("}\n"))
+			_, err = fmt.Fprintf(totalPCL, "%s\n", "}")
 			if err != nil {
 				return err
 			}
@@ -229,7 +228,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 				return err
 			}
 		}
-		_, err = totalPCL.Write([]byte("]\n"))
+		_, err = fmt.Fprintf(totalPCL, "%s\n", "]")
 		if err != nil {
 			return err
 		}

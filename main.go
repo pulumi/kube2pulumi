@@ -2,17 +2,26 @@ package main
 
 import (
 	"fmt"
+	"github.com/pulumi/kube2pulumi/pcl2pulumi"
 	"github.com/pulumi/kube2pulumi/yaml2pcl"
 )
 
-/**
-converts YAML defined in the testData field to PCL and writes it to a temp .pp file
-*/
+// converts a single YAML file (@filepath) to a various pulumi files
+// ("nodejs", "python", "dotnet", "go") in the same directory
 func main() {
-	result, err := yaml2pcl.ConvertFile("conversionTest.yaml")
+	filePath := "conversionTest.yaml"
+	result, err := yaml2pcl.ConvertFile(filePath)
 	if err != nil {
 		fmt.Println(err)
-	} else {
-		fmt.Println(result)
+		return
+	}
+
+	// output format options are "nodejs", "python", "dotnet", "go"
+	err = pcl2pulumi.Pcl2Pulumi(result, filePath, "nodejs")
+	//pcl2pulumi.Pcl2Pulumi(result, filePath, "python")
+	//pcl2pulumi.Pcl2Pulumi(result, filePath, "dotnet")
+	//pcl2pulumi.Pcl2Pulumi(result, filePath, "go")
+	if err != nil {
+		fmt.Println(err)
 	}
 }
