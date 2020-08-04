@@ -18,6 +18,7 @@ var (
 
 func configureCLI() *cobra.Command {
 	rootCmd := &cobra.Command{Use: "kube2pulumi", Long: "converts input files to desired output language"}
+
 	// 4 commands for the distinct languages
 	rootCmd.AddCommand(python.Command())
 	rootCmd.AddCommand(_go.Command())
