@@ -1,7 +1,6 @@
-package test
+package pcl2pulumi
 
 import (
-	"github.com/pulumi/kube2pulumi/pcl2pulumi"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
@@ -24,12 +23,12 @@ foo = kubernetes.core_v1.Namespace("foo",
         "name": "foo",
     })
 `
-	pcl, _ := ioutil.ReadFile("testData/Namespace.pp")
-	err := pcl2pulumi.Pcl2Pulumi(string(pcl), "testData/Namespace", "python")
+	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "python")
 	if err != nil {
 		return
 	}
-	py, _ := ioutil.ReadFile("testData/Namespace.py")
+	py, _ := ioutil.ReadFile("test/data/Namespace.py")
 	assert.Equal(t, pyExpected, string(py))
 }
 
@@ -49,12 +48,12 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
     },
 });
 `
-	pcl, _ := ioutil.ReadFile("testData/Namespace.pp")
-	err := pcl2pulumi.Pcl2Pulumi(string(pcl), "testData/Namespace", "nodejs")
+	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "nodejs")
 	if err != nil {
 		return
 	}
-	ts, _ := ioutil.ReadFile("testData/Namespace.ts")
+	ts, _ := ioutil.ReadFile("test/data/Namespace.ts")
 	assert.Equal(t, tsExpected, string(ts))
 }
 
@@ -83,12 +82,12 @@ class MyStack : Stack
 
 }
 `
-	pcl, _ := ioutil.ReadFile("testData/Namespace.pp")
-	err := pcl2pulumi.Pcl2Pulumi(string(pcl), "testData/Namespace", "dotnet")
+	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "dotnet")
 	if err != nil {
 		return
 	}
-	cs, _ := ioutil.ReadFile("testData/Namespace.cs")
+	cs, _ := ioutil.ReadFile("test/data/Namespace.cs")
 	assert.Equal(t, csExpected, string(cs))
 }
 
@@ -120,11 +119,11 @@ func main() {
 	})
 }
 `
-	pcl, _ := ioutil.ReadFile("testData/Namespace.pp")
-	err := pcl2pulumi.Pcl2Pulumi(string(pcl), "testData/Namespace", "go")
+	pcl, _ := ioutil.ReadFile("test/data/Namespace.pp")
+	err := Pcl2Pulumi(string(pcl), "test/data/Namespace", "go")
 	if err != nil {
 		return
 	}
-	_go, _ := ioutil.ReadFile("testData/Namespace.go")
+	_go, _ := ioutil.ReadFile("test/data/Namespace.go")
 	assert.Equal(t, goExpected, string(_go))
 }

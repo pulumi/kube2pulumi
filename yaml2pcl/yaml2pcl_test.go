@@ -1,7 +1,6 @@
-package test
+package yaml2pcl
 
 import (
-	"github.com/pulumi/kube2pulumi/yaml2pcl"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -23,7 +22,7 @@ name = "foo"
 }
 }
 `
-	result, err := yaml2pcl.ConvertFile("testData/Namespace.yaml")
+	result, err := ConvertFile("test/data/Namespace.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
@@ -37,13 +36,13 @@ func testNamespaceComments(t *testing.T) {
 	expected := `resource foo "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
-# this is a test comment
+# this is a codegentest comment
 metadata = {
 name = "foo"
 }
 }
 `
-	result, err := yaml2pcl.ConvertFile("testData/NamespaceWithComments.yaml")
+	result, err := ConvertFile("test/data/NamespaceWithComments.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
@@ -77,7 +76,7 @@ cpu = 0.2
 }
 }
 `
-	result, err := yaml2pcl.ConvertFile("testData/OnePodArray.yaml")
+	result, err := ConvertFile("test/data/OnePodArray.yaml")
 	if err != nil {
 		assertion.Error(err)
 	} else {
