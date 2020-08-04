@@ -2,13 +2,6 @@ package pcl2pulumi
 
 import (
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
-	"sort"
-	"strings"
-
 	"github.com/hashicorp/hcl/v2"
 	csgen "github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
 	gogen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
@@ -16,48 +9,47 @@ import (
 	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2/syntax"
 	tsgen "github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
 	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+	"sort"
+	"strings"
 )
 
 // generates pulumi program for specified type given the input stream
-func Pcl2Pulumi(pcl string, yamlName string, outputType string) {
+func Pcl2Pulumi(pcl string, yamlName string, output string) error {
 	pclFile, err := buildTempFile(pcl)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return err
 	}
-	/*
-		get original file name
-	*/
+	// get original file name
 	fileName := strings.Split(yamlName, ".")[0]
-	ConvertPulumi(pclFile, fileName, outputType)
+	err = convertPulumi(pclFile, fileName, output)
+	if err != nil {
+		return err
+	}
 	err = os.Remove(pclFile.Name()) // delete temporary .pp file
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
+	return nil
 }
 
 func buildTempFile(pcl string) (*os.File, error) {
-	var err error
-
 	tempFile, err := ioutil.TempFile("", "pcl-*.pp")
 	if err != nil {
 		return nil, err
 	}
 
-	/*
-		Write to the file
-	*/
+	//Write to the file
 	text := []byte(pcl)
 	if _, err = tempFile.Write(text); err != nil {
-		log.Fatal("Failed to write to temporary file", err)
 		return nil, err
 	}
 
-	/*
-		Close the file
-	*/
+	// Close the file
 	if err := tempFile.Close(); err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
@@ -65,7 +57,7 @@ func buildTempFile(pcl string) (*os.File, error) {
 }
 
 // converts .pp file directly in the same directory as the input file
-func ConvertPulumi(ppFile *os.File, newFileName string, outputLanguage string) error {
+func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) error {
 	var generateProgram func(program *hcl2.Program) (map[string][]byte, hcl.Diagnostics, error)
 	var fileExt string
 	switch outputLanguage {
@@ -115,13 +107,13 @@ func ConvertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	}
 	if len(diags) != 0 {
 		writer := program.NewDiagnosticWriter(os.Stderr, 0, true)
-		writer.WriteDiagnostics(diags)
+		err = writer.WriteDiagnostics(diags)
 		if diags.HasErrors() {
-			os.Exit(1)
+			return err
 		}
 	}
 
-	fpaths := make([]string, 0, len(files))
+	var fpaths []string
 	for fpath := range files {
 		fpaths = append(fpaths, fpath)
 	}
@@ -130,7 +122,8 @@ func ConvertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	outputFileName := fmt.Sprintf("%s%s", newFileName, fileExt)
 	for _, p := range fpaths {
 		if err := ioutil.WriteFile(outputFileName, files[p], 0600); err != nil {
-			log.Fatalf("failed to write output file %v: %v", p, err)
+			log.Printf("failed to write output file %v: ", p)
+			return err
 		}
 	}
 	return nil
