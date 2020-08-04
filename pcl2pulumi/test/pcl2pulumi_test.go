@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+// TODO: https://github.com/pulumi/pulumi/issues/5101
+
 func TestPulumiPython(t *testing.T) {
 	namespacePy(t)
 }
