@@ -17,10 +17,10 @@ func Command() *cobra.Command {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("manifest")
 			if filePath == "" && dirPath == "" {
-				return fmt.Errorf("must specify a path for a file or directory")
+				return fmt.Errorf("must specify a path for a file or directory\n")
 			}
 			if filePath != "" && dirPath != "" {
-				return fmt.Errorf("must specify EITHER a path for a file or directory, not both")
+				return fmt.Errorf("must specify EITHER a path for a file or directory, not both\n")
 			}
 			var result string
 			var err error

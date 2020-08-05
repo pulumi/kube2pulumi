@@ -13,15 +13,29 @@ func Command() *cobra.Command {
 		Use:  "typescript",
 		Long: "convert k8s yaml to typescript",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("manifest")
-			if filePath == "" {
-				return fmt.Errorf("must specify manifest file")
+			if filePath == "" && dirPath == "" {
+				return fmt.Errorf("must specify a path for a file or directory")
 			}
-			result, err := yaml2pcl.ConvertFile(filePath)
+			if filePath != "" && dirPath != "" {
+				return fmt.Errorf("must specify EITHER a path for a file or directory, not both")
+			}
+			var result string
+			var err error
+			// filepath only
+			if filePath != "" && dirPath == "" {
+				result, err = yaml2pcl.ConvertFile(filePath + "main")
+			} else { // dir only
+				result, err = yaml2pcl.ConvertDirectory(dirPath)
+			}
 			if err != nil {
 				return err
 			}
-			pcl2pulumi.Pcl2Pulumi(result, filePath, "nodejs")
+			err = pcl2pulumi.Pcl2Pulumi(result, filePath, "nodejs")
+			if err != nil {
+				return err
+			}
 			return nil
 		}}
 
