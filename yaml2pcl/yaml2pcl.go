@@ -6,11 +6,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/parser"
 	"io"
 	"io/ioutil"
 	"strings"
+
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/parser"
 )
 
 // Convert returns a string conversion of the input YAML
@@ -24,6 +25,23 @@ import (
 // }
 func Convert(input []byte) (string, error) {
 	testFiles, err := parser.ParseBytes(input, parser.ParseComments)
+	if err != nil {
+		return "", err
+	}
+	return convert(*testFiles)
+}
+
+// ConvertFile returns a string conversion of the input YAML
+// in a file into PCL: sample below
+// Output: resource foo "kubernetes:core/v1:Namespace" {
+// apiVersion = "v1"
+// kind = "Namespace"
+// metadata = {
+// name = "foo"
+// }
+// }
+func ConvertFile(filename string) (string, error) {
+	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
 	if err != nil {
 		return "", err
 	}
@@ -48,23 +66,6 @@ func ConvertDirectory(dirName string) (string, error) {
 	return buff.String(), nil
 }
 
-// ConvertFile returns a string conversion of the input YAML
-// in a file into PCL: sample below
-// Output: resource foo "kubernetes:core/v1:Namespace" {
-// apiVersion = "v1"
-// kind = "Namespace"
-// metadata = {
-// name = "foo"
-// }
-// }
-func ConvertFile(filename string) (string, error) {
-	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
-	if err != nil {
-		return "", err
-	}
-	return convert(*testFiles)
-}
-
 func convert(testFiles ast.File) (string, error) {
 	var v Visitor
 	var buff bytes.Buffer
@@ -76,7 +77,7 @@ func convert(testFiles ast.File) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		err = walkToPCL(v, doc.Body, &buff)
+		err = walkToPCL(v, doc.Body, &buff, "")
 		if err != nil {
 			return "", err
 		}
@@ -110,7 +111,7 @@ func getHeader(nodes []ast.Node) string {
 			}
 		}
 	}
-	header := fmt.Sprintf("resource %s \"kubernetes:%s:%s\" ", metaName, apiVersion, kind)
+	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, metaName, apiVersion, kind)
 	return header
 }
 
@@ -137,14 +138,16 @@ func getMetaName(nodes []ast.Node) string {
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
-func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
+func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) error {
 	if v := v.Visit(node); v == nil {
 		return nil
 	}
 
 	var err error
 	tk := node.GetToken()
-	// check for comments here in order to add to the PCL string,
+	/**
+	check for comments here in order to add to the PCL string
+	*/
 	if comment := node.GetComment(); comment != nil {
 		_, err = fmt.Fprintf(totalPCL, "%s", comment.Value)
 		if err != nil {
@@ -165,17 +168,21 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			var strVal string
-
-			if strings.HasPrefix(n.String(), "\"") {
-				strVal = fmt.Sprintf("%s\n", n.String())
-			} else {
-				str := n.String()
-				if strings.HasPrefix(n.String(), "'") {
-					str = strings.Trim(n.String(), "'")
-				}
-				strVal = fmt.Sprintf("\"%s\"\n", str)
+			s := n.String()
+			// Remove leading quote if present.
+			if len(s) > 0 && (s[0] == '"' || s[0] == '\'') {
+				s = s[1:]
 			}
+			// Remove trailing quote if present unless it is escaped.
+			if len(s) > 0 && (s[len(s)-1] == '"' || s[len(s)-1] == '\'') {
+				if len(s) == 1 {
+					s = ""
+				}
+				if len(s) > 1 && s[len(s)-2] != '\\' {
+					s = s[:len(s)-1]
+				}
+			}
+			strVal := fmt.Sprintf("%q%s\n", s, suffix)
 			_, err = fmt.Fprintf(totalPCL, "%s", strVal)
 			if err != nil {
 				return err
@@ -190,29 +197,29 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
-		err = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.DocumentNode:
-		err = walkToPCL(v, n.Body, totalPCL)
+		err = walkToPCL(v, n.Body, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 		for _, value := range n.Values {
-			err = walkToPCL(v, value, totalPCL)
+			err = walkToPCL(v, value, totalPCL, "")
 			if err != nil {
 				return err
 			}
 		}
-		_, err = fmt.Fprintf(totalPCL, "%s\n", "}")
+		_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", suffix)
 		if err != nil {
 			return err
 		}
 	case *ast.MappingKeyNode:
-		err = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
@@ -233,28 +240,30 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 			}
 		}
 
-		err = walkToPCL(v, n.Key, totalPCL)
+		err = walkToPCL(v, n.Key, totalPCL, "")
 		if err != nil {
 			return err
 		}
-		err = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 
 		if n.Value.Type() == ast.MappingValueType {
-			_, err = fmt.Fprintf(totalPCL, "%s\n", "}")
+			_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", suffix)
 			if err != nil {
 				return err
 			}
 		}
 	case *ast.SequenceNode:
-		for _, value := range n.Values {
-			err = walkToPCL(v, value, totalPCL)
-			if err != nil {
-				return err
+		suffix := ""
+		for i, value := range n.Values {
+			if len(n.Values) > 1 && i < len(n.Values)-1 {
+				suffix = ","
+			} else {
+				suffix = ""
 			}
-			_, err = fmt.Fprintf(totalPCL, "%s\n", ",")
+			err = walkToPCL(v, value, totalPCL, suffix)
 			if err != nil {
 				return err
 			}
@@ -264,16 +273,16 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 			return err
 		}
 	case *ast.AnchorNode:
-		err = walkToPCL(v, n.Name, totalPCL)
+		err = walkToPCL(v, n.Name, totalPCL, "")
 		if err != nil {
 			return err
 		}
-		err = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.AliasNode:
-		err = walkToPCL(v, n.Value, totalPCL)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
