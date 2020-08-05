@@ -148,7 +148,15 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			strVal := fmt.Sprintf("\"%s\"\n", n.String())
+			s := n.String()
+			// Remove quotes if present to avoid double quoting.
+			if len(s) > 0 && s[0] == '"' {
+				s = s[1:]
+			}
+			if len(s) > 0 && s[len(s)-1] == '"' {
+				s = s[:len(s)-1]
+			}
+			strVal := fmt.Sprintf("%q\n", s)
 			_, err = fmt.Fprintf(totalPCL, "%s", strVal)
 			if err != nil {
 				return err

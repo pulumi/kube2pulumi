@@ -1,8 +1,11 @@
 package yaml2pcl
 
 import (
-	"github.com/stretchr/testify/assert"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConvert(t *testing.T) {
@@ -81,5 +84,22 @@ cpu = 0.2
 		assertion.Error(err)
 	} else {
 		assertion.Equal(expected, result, "Nested array is converted incorrectly")
+	}
+}
+
+func TestRole(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("testdata", "Role.pp"))
+	if err != nil {
+		assertion.Error(err)
+	}
+	expected := string(b)
+
+	result, err := ConvertFile(filepath.Join("testdata", "Role.yaml"))
+	if err != nil {
+		assertion.Error(err)
+	} else {
+		assertion.Equal(expected, result, "Role is converted incorrectly")
 	}
 }
