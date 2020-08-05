@@ -9,6 +9,7 @@ import (
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
 	"io"
+	"io/ioutil"
 	"strings"
 )
 
@@ -27,6 +28,24 @@ func Convert(input []byte) (string, error) {
 		return "", err
 	}
 	return convert(*testFiles)
+}
+
+func ConvertDirectory(dirName string) (string, error) {
+	var buff bytes.Buffer
+	files, _ := ioutil.ReadDir(dirName)
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".yaml") {
+			pcl, err := ConvertFile(dirName + file.Name())
+			if err != nil {
+				return "", err
+			}
+			_, err = fmt.Fprintf(&buff, "%s\n", pcl)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+	return buff.String(), nil
 }
 
 // ConvertFile returns a string conversion of the input YAML
@@ -125,9 +144,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 
 	var err error
 	tk := node.GetToken()
-	/**
-	check for comments here in order to add to the PCL string
-	*/
+	// check for comments here in order to add to the PCL string,
 	if comment := node.GetComment(); comment != nil {
 		_, err = fmt.Fprintf(totalPCL, "%s", comment.Value)
 		if err != nil {
@@ -148,7 +165,17 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			strVal := fmt.Sprintf("\"%s\"\n", n.String())
+			var strVal string
+
+			if strings.HasPrefix(n.String(), "\"") {
+				strVal = fmt.Sprintf("%s\n", n.String())
+			} else {
+				str := n.String()
+				if strings.HasPrefix(n.String(), "'") {
+					str = strings.Trim(n.String(), "'")
+				}
+				strVal = fmt.Sprintf("\"%s\"\n", str)
+			}
 			_, err = fmt.Fprintf(totalPCL, "%s", strVal)
 			if err != nil {
 				return err
@@ -224,6 +251,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer) error {
 	case *ast.SequenceNode:
 		for _, value := range n.Values {
 			err = walkToPCL(v, value, totalPCL)
+			if err != nil {
+				return err
+			}
+			_, err = fmt.Fprintf(totalPCL, "%s\n", ",")
 			if err != nil {
 				return err
 			}
