@@ -156,6 +156,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	}
 	switch n := node.(type) {
 	case *ast.NullNode:
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		if err != nil {
+			return err
+		}
 	case *ast.IntegerNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
@@ -263,9 +267,22 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			} else {
 				suffix = ""
 			}
+
+			if value.Type() == ast.MappingValueType {
+				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "{", "")
+				if err != nil {
+					return err
+				}
+			}
 			err = walkToPCL(v, value, totalPCL, suffix)
 			if err != nil {
 				return err
+			}
+			if value.Type() == ast.MappingValueType {
+				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", "")
+				if err != nil {
+					return err
+				}
 			}
 		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "]")

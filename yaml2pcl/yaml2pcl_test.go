@@ -96,3 +96,20 @@ func TestRole(t *testing.T) {
 		assertion.Equal(expected, result, "Role is converted incorrectly")
 	}
 }
+
+func TestDirk8sOperator(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "expK8sOperator.pp"))
+	if err != nil {
+		assertion.NoError(err)
+	}
+	expected := string(b)
+
+	result, err := ConvertDirectory("../testdata/k8sOperator/")
+	if err != nil {
+		assertion.NoError(err)
+	} else {
+		assertion.Equal(expected, result, "Directory is converted incorrectly")
+	}
+}
