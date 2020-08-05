@@ -10,7 +10,7 @@ apiGroups = [
 ""
 ]
 resources = [
-"pods"
+"pods\\\""
 ]
 verbs = [
 "create"
