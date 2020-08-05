@@ -9,3 +9,9 @@ rules:
       - pods
     verbs:
       - create
+  - apiGroups:
+      - pulumi.com
+    resources:
+      - '*'
+    verbs:
+      - create

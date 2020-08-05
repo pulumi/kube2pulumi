@@ -8,13 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestConvert(t *testing.T) {
-	testNamespace(t)
-	testNamespaceComments(t)
-	test1PodArray(t)
-}
-
-func testNamespace(t *testing.T) {
+func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
 
 	expected := `resource foo "kubernetes:core/v1:Namespace" {
@@ -25,15 +19,15 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("testdata/Namespace.yaml")
+	result, err := ConvertFile("../testdata/Namespace.yaml")
 	if err != nil {
-		assertion.Error(err)
+		assertion.NoError(err)
 	} else {
 		assertion.Equal(expected, result, "Single resource conversion was incorrect")
 	}
 }
 
-func testNamespaceComments(t *testing.T) {
+func TestNamespaceComments(t *testing.T) {
 	assertion := assert.New(t)
 
 	expected := `resource foo "kubernetes:core/v1:Namespace" {
@@ -45,15 +39,15 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("testdata/NamespaceWithComments.yaml")
+	result, err := ConvertFile("../testdata/NamespaceWithComments.yaml")
 	if err != nil {
-		assertion.Error(err)
+		assertion.NoError(err)
 	} else {
 		assertion.Equal(expected, result, "Comments are converted incorrectly")
 	}
 }
 
-func test1PodArray(t *testing.T) {
+func Test1PodArray(t *testing.T) {
 	assertion := assert.New(t)
 
 	expected := `resource bar "kubernetes:core/v1:Pod" {
@@ -79,9 +73,9 @@ cpu = 0.2
 }
 }
 `
-	result, err := ConvertFile("testdata/OnePodArray.yaml")
+	result, err := ConvertFile("../testdata/OnePodArray.yaml")
 	if err != nil {
-		assertion.Error(err)
+		assertion.NoError(err)
 	} else {
 		assertion.Equal(expected, result, "Nested array is converted incorrectly")
 	}
@@ -90,15 +84,15 @@ cpu = 0.2
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("testdata", "Role.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "Role.pp"))
 	if err != nil {
-		assertion.Error(err)
+		assertion.NoError(err)
 	}
 	expected := string(b)
 
-	result, err := ConvertFile(filepath.Join("testdata", "Role.yaml"))
+	result, err := ConvertFile(filepath.Join("..", "testdata", "Role.yaml"))
 	if err != nil {
-		assertion.Error(err)
+		assertion.NoError(err)
 	} else {
 		assertion.Equal(expected, result, "Role is converted incorrectly")
 	}
