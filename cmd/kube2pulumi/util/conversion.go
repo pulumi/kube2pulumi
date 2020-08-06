@@ -6,7 +6,7 @@ import (
 	"github.com/pulumi/kube2pulumi/yaml2pcl"
 )
 
-func VerifyParams(dirPath string, filePath string, language string) error {
+func RunConversion(dirPath string, filePath string, language string) error {
 	if filePath == "" && dirPath == "" {
 		return fmt.Errorf("must specify a path for a file or directory\n")
 	}

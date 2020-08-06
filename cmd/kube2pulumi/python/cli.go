@@ -14,7 +14,7 @@ func Command() *cobra.Command {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("manifest")
 
-			return util.VerifyParams(dirPath, filePath, "python")
+			return util.RunConversion(dirPath, filePath, "python")
 		}}
 	return command
 }
