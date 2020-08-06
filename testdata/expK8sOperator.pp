@@ -4,8 +4,8 @@ kind = "Deployment"
 metadata = {
 name = "pulumi-kubernetes-operator"
 }
-# Currently only 1 replica supported, until leader election: https://github.com/pulumi/pulumi-kubernetes-operator/issues/33
 spec = {
+# Currently only 1 replica supported, until leader election: https://github.com/pulumi/pulumi-kubernetes-operator/issues/33
 replicas = 1
 selector = {
 matchLabels = {

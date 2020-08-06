@@ -370,7 +370,7 @@ func addComment(node ast.Node, totalPCL io.Writer) error {
 	check for comments here in order to add to the PCL string
 	*/
 	if comment := node.GetComment(); comment != nil {
-		_, err := fmt.Fprintf(totalPCL, "%s", comment.Value)
+		_, err := fmt.Fprintf(totalPCL, "%s\n", strings.TrimSpace(comment.Value))
 		if err != nil {
 			return err
 		}
