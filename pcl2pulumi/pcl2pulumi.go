@@ -2,6 +2,14 @@ package pcl2pulumi
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"path"
+	"path/filepath"
+	"sort"
+	"strings"
+
 	"github.com/hashicorp/hcl/v2"
 	csgen "github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
 	gogen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
@@ -9,29 +17,25 @@ import (
 	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2/syntax"
 	tsgen "github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
 	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
-	"io/ioutil"
-	"log"
-	"os"
-	"path"
-	"sort"
-	"strings"
 )
 
 // generates pulumi program for specified type given the input stream
-func Pcl2Pulumi(pcl string, yamlName string, output string) error {
+func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) (string, error) {
 	pclFile, err := buildTempFile(pcl)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer os.Remove(pclFile.Name())
 
 	// get original file name
-	fileName := strings.Split(yamlName, ".")[0]
-	err = convertPulumi(pclFile, fileName, output)
+	dir, fileName := filepath.Split(outputFilePathAndName)
+	fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	outPath := fmt.Sprintf("%s%s", dir, fileName)
+	err = convertPulumi(pclFile, outPath, output)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return outPath, nil
 }
 
 func buildTempFile(pcl string) (*os.File, error) {

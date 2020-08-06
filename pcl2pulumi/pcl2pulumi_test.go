@@ -13,23 +13,28 @@ func TestPulumiPython(t *testing.T) {
 }
 
 func namespacePy(t *testing.T) {
+	assertion := assert.New(t)
+
 	pyExpected := `import pulumi
 import pulumi_kubernetes as kubernetes
 
-foo = kubernetes.core_v1.Namespace("foo",
+foo = kubernetes.core.v1.Namespace("foo",
     api_version="v1",
     kind="Namespace",
     metadata={
         "name": "foo",
     })
 `
-	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "python")
-	if err != nil {
-		return
-	}
-	py, _ := ioutil.ReadFile("testdata/Namespace.py")
-	assert.Equal(t, pyExpected, string(py))
+	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "python")
+	assertion.NoError(err)
+
+	py, err := ioutil.ReadFile("../testdata/Namespace.py")
+	assertion.NoError(err)
+
+	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
 }
 
 func TestPulumiTypeScript(t *testing.T) {
@@ -37,6 +42,8 @@ func TestPulumiTypeScript(t *testing.T) {
 }
 
 func namespaceTs(t *testing.T) {
+	assertion := assert.New(t)
+
 	tsExpected := `import * as pulumi from "@pulumi/pulumi";
 import * as kubernetes from "@pulumi/kubernetes";
 
@@ -48,13 +55,16 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
     },
 });
 `
-	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "nodejs")
-	if err != nil {
-		return
-	}
-	ts, _ := ioutil.ReadFile("testdata/Namespace.ts")
-	assert.Equal(t, tsExpected, string(ts))
+	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "nodejs")
+	assertion.NoError(err)
+
+	ts, err := ioutil.ReadFile("../testdata/Namespace.ts")
+	assertion.NoError(err)
+
+	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
 }
 
 func TestPulumiDotNet(t *testing.T) {
@@ -62,6 +72,8 @@ func TestPulumiDotNet(t *testing.T) {
 }
 
 func namespaceDotNet(t *testing.T) {
+	assertion := assert.New(t)
+
 	csExpected := `using Pulumi;
 using Kubernetes = Pulumi.Kubernetes;
 
@@ -82,13 +94,16 @@ class MyStack : Stack
 
 }
 `
-	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "dotnet")
-	if err != nil {
-		return
-	}
-	cs, _ := ioutil.ReadFile("testdata/Namespace.cs")
-	assert.Equal(t, csExpected, string(cs))
+	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "dotnet")
+	assertion.NoError(err)
+
+	cs, err := ioutil.ReadFile("../testdata/Namespace.cs")
+	assertion.NoError(err)
+
+	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
 }
 
 func TestPulumiGoLang(t *testing.T) {
@@ -96,19 +111,22 @@ func TestPulumiGoLang(t *testing.T) {
 }
 
 func namespaceGo(t *testing.T) {
+	assertion := assert.New(t)
+
 	goExpected := `package main
 
 import (
-	"github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		_, err := core / v1.NewNamespace(ctx, "foo", &core/v1.NamespaceArgs{
+		_, err := corev1.NewNamespace(ctx, "foo", &corev1.NamespaceArgs{
 			ApiVersion: pulumi.String("v1"),
 			Kind:       pulumi.String("Namespace"),
-			Metadata: &meta.ObjectMetaArgs{
+			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("foo"),
 			},
 		})
@@ -119,11 +137,14 @@ func main() {
 	})
 }
 `
-	pcl, _ := ioutil.ReadFile("testdata/Namespace.pp")
-	err := Pcl2Pulumi(string(pcl), "testdata/Namespace", "go")
-	if err != nil {
-		return
-	}
-	_go, _ := ioutil.ReadFile("testdata/Namespace.go")
-	assert.Equal(t, goExpected, string(_go))
+	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "go")
+	assertion.NoError(err)
+
+	_go, err := ioutil.ReadFile("../testdata/Namespace.go")
+	assertion.NoError(err)
+
+	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
 }

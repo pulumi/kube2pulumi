@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	manifestFile string
+	manifestFile  string
+	directoryPath string
 )
 
 func configureCLI() *cobra.Command {
@@ -27,6 +28,9 @@ func configureCLI() *cobra.Command {
 
 	rootCmd.PersistentFlags().StringVarP(&manifestFile, "manifest", "m", "", "manifest file to convert")
 	viper.BindPFlag("manifest", rootCmd.PersistentFlags().Lookup("manifest"))
+
+	rootCmd.PersistentFlags().StringVarP(&directoryPath, "directory", "d", "", "file path for directory to convert")
+	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))
 
 	return rootCmd
 }

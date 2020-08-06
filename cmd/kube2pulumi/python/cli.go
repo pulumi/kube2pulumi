@@ -2,9 +2,7 @@ package python
 
 import (
 	"fmt"
-
-	"github.com/pulumi/kube2pulumi/pcl2pulumi"
-	"github.com/pulumi/kube2pulumi/yaml2pcl"
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,17 +12,14 @@ func Command() *cobra.Command {
 		Use:  "python",
 		Long: "convert k8s yaml to python",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("manifest")
-			if filePath == "" {
-				return fmt.Errorf("must specify manifest file")
-			}
-			result, err := yaml2pcl.ConvertFile(filePath)
+			result, err := util.RunConversion(dirPath, filePath, "python")
 			if err != nil {
 				return err
 			}
-			pcl2pulumi.Pcl2Pulumi(result, filePath, "python")
+			fmt.Printf("Conversion successful! Generated File: %s.py\n", result)
 			return nil
 		}}
-
 	return command
 }

@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/goccy/go-yaml/ast"
@@ -47,6 +49,27 @@ func ConvertFile(filename string) (string, error) {
 	return convert(*testFiles)
 }
 
+func ConvertDirectory(dirName string) (string, error) {
+	var buff bytes.Buffer
+	files, err := ioutil.ReadDir(dirName)
+	if err != nil {
+		return "", err
+	}
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".yaml") {
+			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
+			if err != nil {
+				return "", err
+			}
+			_, err = fmt.Fprintf(&buff, "%s\n", pcl)
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+	return buff.String(), nil
+}
+
 func convert(testFiles ast.File) (string, error) {
 	var v Visitor
 	var buff bytes.Buffer
@@ -81,7 +104,7 @@ func getHeader(nodes []ast.Node) string {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
 
-	metaName := getMetaName(nodes)
+	name := resourceName(nodes)
 
 	var kind string
 	for _, node := range nodes {
@@ -92,30 +115,49 @@ func getHeader(nodes []ast.Node) string {
 			}
 		}
 	}
-	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, metaName, apiVersion, kind)
+	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
 	return header
 }
 
-// returns <metadata/name> field as a string from AST
-func getMetaName(nodes []ast.Node) string {
+// resourceName computes a name for the resource based on the namespace, name, and kind.
+func resourceName(nodes []ast.Node) string {
+	var kind, name, ns string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
+			if len(kind) == 0 && mapValNode.Key.String() == "kind" {
+				kind = mapValNode.Value.String()
+				continue
+			}
 			if mapValNode.Key.String() == "metadata" {
 				if mapValNode.Value.Type() == ast.StringType {
-					return mapValNode.Value.String()
+					name = mapValNode.Value.String()
+					continue
 				} else {
 					for _, inner := range ast.Filter(ast.MappingValueType, node) {
 						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
 							if innerMvNode.Key.String() == "name" {
-								return innerMvNode.Value.String()
+								name = innerMvNode.Value.String()
+							} else if innerMvNode.Key.String() == "namespace" {
+								ns = innerMvNode.Value.String()
 							}
 						}
 					}
 				}
 			}
 		}
+		if len(ns) > 0 && len(name) > 0 {
+			break
+		}
 	}
-	return ""
+
+	name = strings.ReplaceAll(strings.ToLower(name), "-", "_")
+	ns = strings.ReplaceAll(strings.ToLower(ns), "-", "_")
+
+	if len(ns) > 0 {
+		name = strings.ToUpper(string(name[0])) + name[1:]
+		return fmt.Sprintf("%s%s%s", ns, name, kind)
+	}
+	return fmt.Sprintf("%s%s", name, kind)
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
@@ -125,29 +167,41 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	}
 
 	var err error
+
 	tk := node.GetToken()
-	/**
-	check for comments here in order to add to the PCL string
-	*/
-	if comment := node.GetComment(); comment != nil {
-		_, err = fmt.Fprintf(totalPCL, "%s", comment.Value)
+	switch n := node.(type) {
+	case *ast.NullNode:
+		err = addComment(node, totalPCL)
 		if err != nil {
 			return err
 		}
-	}
-	switch n := node.(type) {
-	case *ast.NullNode:
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		if err != nil {
+			return err
+		}
 	case *ast.IntegerNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.FloatNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.StringNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		if tk.Next == nil || tk.Next.Value != ":" {
 			s := n.String()
 			// Remove leading quote if present.
@@ -171,6 +225,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
@@ -178,17 +236,29 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.DocumentNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Body, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		for _, value := range n.Values {
 			err = walkToPCL(v, value, totalPCL, "")
 			if err != nil {
@@ -200,11 +270,19 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	case *ast.MappingKeyNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.MappingValueNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
 		if err != nil {
 			return err
@@ -244,9 +322,26 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			} else {
 				suffix = ""
 			}
+
+			if value.Type() == ast.MappingValueType {
+				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "{", "")
+				if err != nil {
+					return err
+				}
+			}
+			err = addComment(node, totalPCL)
+			if err != nil {
+				return err
+			}
 			err = walkToPCL(v, value, totalPCL, suffix)
 			if err != nil {
 				return err
+			}
+			if value.Type() == ast.MappingValueType {
+				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", "")
+				if err != nil {
+					return err
+				}
 			}
 		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "]")
@@ -269,6 +364,20 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	default:
 		return errors.New("unexpected node type: " + n.Type().String())
+	}
+
+	return nil
+}
+
+func addComment(node ast.Node, totalPCL io.Writer) error {
+	/**
+	check for comments here in order to add to the PCL string
+	*/
+	if comment := node.GetComment(); comment != nil {
+		_, err := fmt.Fprintf(totalPCL, "%s\n", strings.TrimSpace(comment.Value))
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

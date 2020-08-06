@@ -11,7 +11,7 @@ import (
 func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource foo "kubernetes:core/v1:Namespace" {
+	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 metadata = {
@@ -20,17 +20,14 @@ name = "foo"
 }
 `
 	result, err := ConvertFile("../testdata/Namespace.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Single resource conversion was incorrect")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Single resource conversion was incorrect")
 }
 
 func TestNamespaceComments(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource foo "kubernetes:core/v1:Namespace" {
+	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 # this is a codegentest comment
@@ -40,17 +37,14 @@ name = "foo"
 }
 `
 	result, err := ConvertFile("../testdata/NamespaceWithComments.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Comments are converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
 
 func Test1PodArray(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource bar "kubernetes:core/v1:Pod" {
+	expected := `resource fooBarPod "kubernetes:core/v1:Pod" {
 apiVersion = "v1"
 kind = "Pod"
 metadata = {
@@ -74,26 +68,30 @@ cpu = 0.2
 }
 `
 	result, err := ConvertFile("../testdata/OnePodArray.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Nested array is converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Nested array is converted incorrectly")
 }
 
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
 	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "Role.pp"))
-	if err != nil {
-		assertion.NoError(err)
-	}
+	assertion.NoError(err)
 	expected := string(b)
 
 	result, err := ConvertFile(filepath.Join("..", "testdata", "Role.yaml"))
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Role is converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Role is converted incorrectly")
+}
+
+func TestDirk8sOperator(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "expK8sOperator.pp"))
+	assertion.NoError(err)
+	expected := string(b)
+
+	result, err := ConvertDirectory("../testdata/k8sOperator/")
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Directory is converted incorrectly")
 }
