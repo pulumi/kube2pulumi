@@ -100,7 +100,7 @@ func getHeader(nodes []ast.Node) string {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
 
-	metaName := getMetaName(nodes)
+	name := resourceName(nodes)
 
 	var kind string
 	for _, node := range nodes {
@@ -111,30 +111,49 @@ func getHeader(nodes []ast.Node) string {
 			}
 		}
 	}
-	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, metaName, apiVersion, kind)
+	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
 	return header
 }
 
-// returns <metadata/name> field as a string from AST
-func getMetaName(nodes []ast.Node) string {
+// resourceName computes a name for the resource based on the namespace, name, and kind.
+func resourceName(nodes []ast.Node) string {
+	var kind, name, ns string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
+			if len(kind) == 0 && mapValNode.Key.String() == "kind" {
+				kind = mapValNode.Value.String()
+				continue
+			}
 			if mapValNode.Key.String() == "metadata" {
 				if mapValNode.Value.Type() == ast.StringType {
-					return mapValNode.Value.String()
+					name = mapValNode.Value.String()
+					continue
 				} else {
 					for _, inner := range ast.Filter(ast.MappingValueType, node) {
 						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
 							if innerMvNode.Key.String() == "name" {
-								return innerMvNode.Value.String()
+								name = innerMvNode.Value.String()
+							} else if innerMvNode.Key.String() == "namespace" {
+								ns = innerMvNode.Value.String()
 							}
 						}
 					}
 				}
 			}
 		}
+		if len(ns) > 0 && len(name) > 0 {
+			break
+		}
 	}
-	return ""
+
+	name = strings.ReplaceAll(strings.ToLower(name), "-", "_")
+	ns = strings.ReplaceAll(strings.ToLower(ns), "-", "_")
+
+	if len(ns) > 0 {
+		name = strings.ToUpper(string(name[0])) + name[1:]
+		return fmt.Sprintf("%s%s%s", ns, name, kind)
+	}
+	return fmt.Sprintf("%s%s", name, kind)
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
