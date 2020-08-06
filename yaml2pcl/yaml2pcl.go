@@ -163,33 +163,41 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	}
 
 	var err error
+
 	tk := node.GetToken()
-	/**
-	check for comments here in order to add to the PCL string
-	*/
-	if comment := node.GetComment(); comment != nil {
-		_, err = fmt.Fprintf(totalPCL, "%s", comment.Value)
+	switch n := node.(type) {
+	case *ast.NullNode:
+		err = addComment(node, totalPCL)
 		if err != nil {
 			return err
 		}
-	}
-	switch n := node.(type) {
-	case *ast.NullNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.IntegerNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.FloatNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
 	case *ast.StringNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		if tk.Next == nil || tk.Next.Value != ":" {
 			s := n.String()
 			// Remove leading quote if present.
@@ -213,6 +221,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
@@ -220,17 +232,29 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.DocumentNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Body, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		for _, value := range n.Values {
 			err = walkToPCL(v, value, totalPCL, "")
 			if err != nil {
@@ -242,11 +266,19 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	case *ast.MappingKeyNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
 		}
 	case *ast.MappingValueNode:
+		err = addComment(node, totalPCL)
+		if err != nil {
+			return err
+		}
 		_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
 		if err != nil {
 			return err
@@ -293,6 +325,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 					return err
 				}
 			}
+			err = addComment(node, totalPCL)
+			if err != nil {
+				return err
+			}
 			err = walkToPCL(v, value, totalPCL, suffix)
 			if err != nil {
 				return err
@@ -324,6 +360,20 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	default:
 		return errors.New("unexpected node type: " + n.Type().String())
+	}
+
+	return nil
+}
+
+func addComment(node ast.Node, totalPCL io.Writer) error {
+	/**
+	check for comments here in order to add to the PCL string
+	*/
+	if comment := node.GetComment(); comment != nil {
+		_, err := fmt.Fprintf(totalPCL, "%s", comment.Value)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

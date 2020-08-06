@@ -19,6 +19,9 @@ func RunConversion(dirPath string, filePath string, language string) error {
 	if filePath != "" {
 		result, err = yaml2pcl.ConvertFile(filePath)
 		err = pcl2pulumi.Pcl2Pulumi(result, filePath, language)
+
+		fmt.Println(result)
+
 		if err != nil {
 			return err
 		}

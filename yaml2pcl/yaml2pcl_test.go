@@ -10,7 +10,7 @@ import (
 func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource foo "kubernetes:core/v1:Namespace" {
+	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 metadata = {
@@ -29,7 +29,7 @@ name = "foo"
 func TestNamespaceComments(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource foo "kubernetes:core/v1:Namespace" {
+	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 # this is a codegentest comment
@@ -49,7 +49,7 @@ name = "foo"
 func Test1PodArray(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource bar "kubernetes:core/v1:Pod" {
+	expected := `resource fooBarPod "kubernetes:core/v1:Pod" {
 apiVersion = "v1"
 kind = "Pod"
 metadata = {

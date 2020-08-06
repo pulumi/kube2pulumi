@@ -1,4 +1,4 @@
-resource pulumi-kubernetes-operator "kubernetes:apps/v1:Deployment" {
+resource pulumi_kubernetes_operatorDeployment "kubernetes:apps/v1:Deployment" {
 apiVersion = "apps/v1"
 kind = "Deployment"
 metadata = {
@@ -65,7 +65,7 @@ value = "pulumi-kubernetes-operator"
 }
 }
 
-resource pulumi-kubernetes-operator "kubernetes:rbac.authorization.k8s.io/v1:Role" {
+resource pulumi_kubernetes_operatorRole "kubernetes:rbac.authorization.k8s.io/v1:Role" {
 apiVersion = "rbac.authorization.k8s.io/v1"
 kind = "Role"
 metadata = {
@@ -186,7 +186,7 @@ verbs = [
 ]
 }
 
-resource pulumi-kubernetes-operator "kubernetes:rbac.authorization.k8s.io/v1:RoleBinding" {
+resource pulumi_kubernetes_operatorRoleBinding "kubernetes:rbac.authorization.k8s.io/v1:RoleBinding" {
 kind = "RoleBinding"
 apiVersion = "rbac.authorization.k8s.io/v1"
 metadata = {
@@ -205,7 +205,7 @@ apiGroup = "rbac.authorization.k8s.io"
 }
 }
 
-resource pulumi-kubernetes-operator "kubernetes:core/v1:ServiceAccount" {
+resource pulumi_kubernetes_operatorServiceAccount "kubernetes:core/v1:ServiceAccount" {
 apiVersion = "v1"
 kind = "ServiceAccount"
 metadata = {

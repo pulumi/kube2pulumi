@@ -116,20 +116,21 @@ func namespaceGo(t *testing.T) {
 	goExpected := `package main
 
 import (
-	"github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
 )
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		_, err := core.v1.NewNamespace(ctx, "foo", &core.v1.NamespaceArgs{
+		_, err := corev1.NewNamespace(ctx, "foo", &corev1.NamespaceArgs{
 			ApiVersion: pulumi.String("v1"),
 			Kind:       pulumi.String("Namespace"),
-			Metadata: &meta.ObjectMetaArgs{
+			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("foo"),
 			},
 		})
-		
+		if err != nil {
 			return err
 		}
 		return nil
