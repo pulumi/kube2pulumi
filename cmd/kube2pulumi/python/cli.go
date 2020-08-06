@@ -25,7 +25,7 @@ func Command() *cobra.Command {
 			var result string
 			var err error
 			// filepath only
-			if filePath != "" && dirPath == "" {
+			if filePath != "" {
 				result, err = yaml2pcl.ConvertFile(filePath + "main")
 			} else { // dir only
 				result, err = yaml2pcl.ConvertDirectory(dirPath)
