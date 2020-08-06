@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
+	"path/filepath"
+
 	"github.com/pulumi/kube2pulumi/pcl2pulumi"
 	"github.com/pulumi/kube2pulumi/yaml2pcl"
-	"path/filepath"
 )
 
 func RunConversion(dirPath string, filePath string, language string) (string, error) {

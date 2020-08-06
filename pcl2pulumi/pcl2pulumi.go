@@ -2,13 +2,6 @@ package pcl2pulumi
 
 import (
 	"fmt"
-	"github.com/hashicorp/hcl/v2"
-	csgen "github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
-	gogen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2/syntax"
-	tsgen "github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
-	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,6 +9,14 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/hashicorp/hcl/v2"
+	csgen "github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
+	gogen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
+	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2"
+	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2/syntax"
+	tsgen "github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
+	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
 )
 
 // generates pulumi program for specified type given the input stream
