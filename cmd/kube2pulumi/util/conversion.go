@@ -18,15 +18,16 @@ func RunConversion(dirPath string, filePath string, language string) error {
 	// filepath only
 	if filePath != "" {
 		result, err = yaml2pcl.ConvertFile(filePath)
+		err = pcl2pulumi.Pcl2Pulumi(result, filePath, language)
+		if err != nil {
+			return err
+		}
 	} else { // dir only
-		result, err = yaml2pcl.ConvertDirectory(fmt.Sprintf("%smain", dirPath))
-	}
-	if err != nil {
-		return err
-	}
-	err = pcl2pulumi.Pcl2Pulumi(result, filePath, language)
-	if err != nil {
-		return err
+		result, err = yaml2pcl.ConvertDirectory(dirPath)
+		err = pcl2pulumi.Pcl2Pulumi(result, fmt.Sprintf("%smain", dirPath), language)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
