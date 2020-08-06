@@ -19,21 +19,22 @@ import (
 )
 
 // generates pulumi program for specified type given the input stream
-func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) error {
+func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) (string, error) {
 	pclFile, err := buildTempFile(pcl)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer os.Remove(pclFile.Name())
 
 	// get original file name
 	dir, fileName := filepath.Split(outputFilePathAndName)
-	fileName = strings.Split(fileName, ".")[0]
-	err = convertPulumi(pclFile, fmt.Sprintf("%s%s", dir, fileName), output)
+	fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	outPath := fmt.Sprintf("%s%s", dir, fileName)
+	err = convertPulumi(pclFile, outPath, output)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return outPath, nil
 }
 
 func buildTempFile(pcl string) (*os.File, error) {

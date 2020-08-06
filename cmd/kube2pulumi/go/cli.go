@@ -1,6 +1,7 @@
 package _go
 
 import (
+	"fmt"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -13,8 +14,12 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("manifest")
-
-			return util.RunConversion(dirPath, filePath, "go")
+			result, err := util.RunConversion(dirPath, filePath, "go")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Conversion successful! Generated File: %s.go", result)
+			return nil
 		}}
 
 	return command

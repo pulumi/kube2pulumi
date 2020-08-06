@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/goccy/go-yaml/ast"
@@ -50,10 +51,13 @@ func ConvertFile(filename string) (string, error) {
 
 func ConvertDirectory(dirName string) (string, error) {
 	var buff bytes.Buffer
-	files, _ := ioutil.ReadDir(dirName)
+	files, err := ioutil.ReadDir(dirName)
+	if err != nil {
+		return "", err
+	}
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".yaml") {
-			pcl, err := ConvertFile(dirName + file.Name())
+			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
 			if err != nil {
 				return "", err
 			}
