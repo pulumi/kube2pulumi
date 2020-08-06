@@ -29,7 +29,7 @@ func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) error {
 	// get original file name
 	dir, fileName := filepath.Split(outputFilePathAndName)
 	fileName = strings.Split(fileName, ".")[0]
-	err = convertPulumi(pclFile, dir+fileName, output)
+	err = convertPulumi(pclFile, fmt.Sprintf("%s%s", dir, fileName), output)
 	if err != nil {
 		return err
 	}
