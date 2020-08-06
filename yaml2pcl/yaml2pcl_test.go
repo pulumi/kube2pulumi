@@ -1,10 +1,11 @@
 package yaml2pcl
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNamespace(t *testing.T) {
@@ -19,11 +20,8 @@ name = "foo"
 }
 `
 	result, err := ConvertFile("../testdata/Namespace.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Single resource conversion was incorrect")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Single resource conversion was incorrect")
 }
 
 func TestNamespaceComments(t *testing.T) {
@@ -39,11 +37,8 @@ name = "foo"
 }
 `
 	result, err := ConvertFile("../testdata/NamespaceWithComments.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Comments are converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
 
 func Test1PodArray(t *testing.T) {
@@ -73,43 +68,30 @@ cpu = 0.2
 }
 `
 	result, err := ConvertFile("../testdata/OnePodArray.yaml")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Nested array is converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Nested array is converted incorrectly")
 }
 
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
 	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "Role.pp"))
-	if err != nil {
-		assertion.NoError(err)
-	}
+	assertion.NoError(err)
 	expected := string(b)
 
 	result, err := ConvertFile(filepath.Join("..", "testdata", "Role.yaml"))
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Role is converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Role is converted incorrectly")
 }
 
 func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
 	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "expK8sOperator.pp"))
-	if err != nil {
-		assertion.NoError(err)
-	}
+	assertion.NoError(err)
 	expected := string(b)
 
 	result, err := ConvertDirectory("../testdata/k8sOperator/")
-	if err != nil {
-		assertion.NoError(err)
-	} else {
-		assertion.Equal(expected, result, "Directory is converted incorrectly")
-	}
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Directory is converted incorrectly")
 }
