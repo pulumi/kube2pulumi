@@ -28,7 +28,7 @@ foo = kubernetes.core.v1.Namespace("foo",
 	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "python")
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "python")
 	assertion.NoError(err)
 
 	py, err := ioutil.ReadFile("../testdata/Namespace.py")
@@ -58,7 +58,7 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
 	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "nodejs")
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "nodejs")
 	assertion.NoError(err)
 
 	ts, err := ioutil.ReadFile("../testdata/Namespace.ts")
@@ -97,7 +97,7 @@ class MyStack : Stack
 	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "dotnet")
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "dotnet")
 	assertion.NoError(err)
 
 	cs, err := ioutil.ReadFile("../testdata/Namespace.cs")
@@ -140,7 +140,7 @@ func main() {
 	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "go")
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "go")
 	assertion.NoError(err)
 
 	_go, err := ioutil.ReadFile("../testdata/Namespace.go")
