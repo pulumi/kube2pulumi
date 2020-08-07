@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pulumi/kube2pulumi/pcl2pulumi"
-	"github.com/pulumi/kube2pulumi/yaml2pcl"
+	"github.com/pulumi/kube2pulumi/pkg/pcl2pulumi"
+	"github.com/pulumi/kube2pulumi/pkg/yaml2pcl"
 )
 
 func RunConversion(dirPath string, filePath string, language string) (string, error) {

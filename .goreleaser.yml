@@ -20,3 +20,14 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
   skip: true
+brews:
+  - 
+    name: kube2pulumi
+    github:
+      owner: pulumi
+      name: homebrew-tap
+    commit_author:
+      name: pulumi-bot
+      email: bot@pulumi.com
+    homepage: "https://pulumi.io"
+    description: "Convert Kubernetes manifests to Pulumi code"
