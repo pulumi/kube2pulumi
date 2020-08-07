@@ -56,7 +56,7 @@ func ConvertDirectory(dirName string) (string, error) {
 		return "", err
 	}
 	for _, file := range files {
-		if strings.Contains(file.Name(), ".yaml") {
+		if strings.Contains(file.Name(), ".yaml") || strings.Contains(file.Name(), ".yml") {
 			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
 			if err != nil {
 				return "", err
@@ -77,7 +77,11 @@ func convert(testFiles ast.File) (string, error) {
 
 	for _, doc := range testFiles.Docs {
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		_, err = fmt.Fprint(&buff, getHeader(baseNodes))
+		header, err := getHeader(baseNodes)
+		if err != nil {
+			return "", err
+		}
+		_, err = fmt.Fprint(&buff, header)
 		if err != nil {
 			return "", err
 		}
@@ -90,7 +94,7 @@ func convert(testFiles ast.File) (string, error) {
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node) string {
+func getHeader(nodes []ast.Node) (string, error) {
 	var apiVersion string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -103,8 +107,14 @@ func getHeader(nodes []ast.Node) string {
 	if !strings.Contains(apiVersion, "/") {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
+	if apiVersion == "" {
+		return "", fmt.Errorf("malformed yaml: apiVersion not specified\n")
+	}
 
 	name := resourceName(nodes)
+	if name == "" {
+		return "", fmt.Errorf("malformed yaml: metadata/name not specified\n")
+	}
 
 	var kind string
 	for _, node := range nodes {
@@ -115,8 +125,12 @@ func getHeader(nodes []ast.Node) string {
 			}
 		}
 	}
+	if kind == "" {
+		return "", fmt.Errorf("malformed yaml: resource kind not specified\n")
+	}
+
 	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
-	return header
+	return header, nil
 }
 
 // resourceName computes a name for the resource based on the namespace, name, and kind.

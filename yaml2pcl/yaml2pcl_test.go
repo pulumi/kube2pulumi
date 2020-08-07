@@ -112,3 +112,30 @@ name = "foo"
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
+
+func TestIncorrectPath(t *testing.T) {
+	assertion := assert.New(t)
+	fakePath := "fakePath"
+	_, err := ConvertFile(fakePath)
+	assertion.Error(err)
+	_, err = ConvertDirectory(fakePath)
+	assertion.Error(err)
+}
+
+func TestMalformedHeaderYaml(t *testing.T) {
+	assertion := assert.New(t)
+	_, err := ConvertFile("../testdata/MalformedYaml.yaml")
+	assertion.Error(err)
+}
+
+func TestMultipleResourceGen(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "MultipleResources.pcl"))
+	assertion.NoError(err)
+	expected := string(b)
+
+	result, _ := ConvertFile("../testdata/MultipleResources.yml")
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "File with multiple resources is converted incorrectly")
+}
