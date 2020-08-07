@@ -13,7 +13,7 @@ func Command() *cobra.Command {
 		Long: "convert k8s yaml to all supported languages",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
-			filePath := viper.GetString("manifest")
+			filePath := viper.GetString("file")
 
 			python, err := util.RunConversion(dirPath, filePath, "python")
 			if err != nil {
