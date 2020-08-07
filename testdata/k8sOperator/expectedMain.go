@@ -10,7 +10,9 @@ import (
 
 func main() {
 	pulumi.Run(func(ctx *pulumi.Context) error {
-		_, err = appsv1.NewDeployment(ctx, "operatorDeployment", &appsv1.DeploymentArgs{
+		_, err := appsv1.NewDeployment(ctx, "pulumi_kubernetes_operatorDeployment", &appsv1.DeploymentArgs{
+			ApiVersion: pulumi.String("apps/v1"),
+			Kind:       pulumi.String("Deployment"),
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("pulumi-kubernetes-operator"),
 			},
@@ -37,7 +39,7 @@ func main() {
 						Containers: corev1.ContainerArray{
 							&corev1.ContainerArgs{
 								Name:  pulumi.String("pulumi-kubernetes-operator"),
-								Image: pulumi.String("pulumi/pulumi-kubernetes-operator:v0.0.1"),
+								Image: pulumi.String("pulumi/pulumi-kubernetes-operator:v0.0.2"),
 								Command: pulumi.StringArray{
 									pulumi.String("pulumi-kubernetes-operator"),
 								},
@@ -76,9 +78,12 @@ func main() {
 		if err != nil {
 			return err
 		}
-		_, err = rbacv1.NewRole(ctx, "operatorRole", &rbacv1.RoleArgs{
+		_, err = rbacv1.NewRole(ctx, "pulumi_kubernetes_operatorRole", &rbacv1.RoleArgs{
+			ApiVersion: pulumi.String("rbac.authorization.k8s.io/v1"),
+			Kind:       pulumi.String("Role"),
 			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("pulumi-kubernetes-operator"),
+				CreationTimestamp: nil,
+				Name:              pulumi.String("pulumi-kubernetes-operator"),
 			},
 			Rules: rbacv1.PolicyRuleArray{
 				&rbacv1.PolicyRuleArgs{
@@ -133,8 +138,8 @@ func main() {
 						pulumi.String("servicemonitors"),
 					},
 					Verbs: pulumi.StringArray{
-						pulumi.String("create"),
 						pulumi.String("get"),
+						pulumi.String("create"),
 					},
 				},
 				&rbacv1.PolicyRuleArgs{
@@ -196,7 +201,9 @@ func main() {
 		if err != nil {
 			return err
 		}
-		_, err = rbacv1.NewRoleBinding(ctx, "operatorRoleBinding", &rbacv1.RoleBindingArgs{
+		_, err = rbacv1.NewRoleBinding(ctx, "pulumi_kubernetes_operatorRoleBinding", &rbacv1.RoleBindingArgs{
+			Kind:       pulumi.String("RoleBinding"),
+			ApiVersion: pulumi.String("rbac.authorization.k8s.io/v1"),
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("pulumi-kubernetes-operator"),
 			},
@@ -209,13 +216,15 @@ func main() {
 			RoleRef: &rbacv1.RoleRefArgs{
 				Kind:     pulumi.String("Role"),
 				Name:     pulumi.String("pulumi-kubernetes-operator"),
-				ApiGroup: pulumi.String("rbacv1"),
+				ApiGroup: pulumi.String("rbac.authorization.k8s.io"),
 			},
 		})
 		if err != nil {
 			return err
 		}
-		_, err := corev1.NewServiceAccount(ctx, "operatorServiceAccount", &corev1.ServiceAccountArgs{
+		_, err = corev1.NewServiceAccount(ctx, "pulumi_kubernetes_operatorServiceAccount", &corev1.ServiceAccountArgs{
+			ApiVersion: pulumi.String("v1"),
+			Kind:       pulumi.String("ServiceAccount"),
 			Metadata: &metav1.ObjectMetaArgs{
 				Name: pulumi.String("pulumi-kubernetes-operator"),
 			},

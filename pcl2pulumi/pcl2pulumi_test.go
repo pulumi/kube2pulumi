@@ -145,7 +145,7 @@ func testOperatorCs(t *testing.T) {
 	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "cs")
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "dotnet")
 	assertion.NoError(err)
 
 	cs, err := ioutil.ReadFile("../testdata/k8sOperator/main.cs")
@@ -195,7 +195,7 @@ func main() {
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
 }
 
-func testOperatorGo(t *testing.T) {
+func TestOperatorGo(t *testing.T) {
 	assertion := assert.New(t)
 
 	goExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.go")
