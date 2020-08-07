@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/all"
 	"os"
 
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/dotnet"
@@ -25,6 +26,7 @@ func configureCLI() *cobra.Command {
 	rootCmd.AddCommand(_go.Command())
 	rootCmd.AddCommand(nodejs.Command())
 	rootCmd.AddCommand(dotnet.Command())
+	rootCmd.AddCommand(all.Command())
 
 	rootCmd.PersistentFlags().StringVarP(&manifestFile, "manifest", "m", "", "manifest file to convert")
 	viper.BindPFlag("manifest", rootCmd.PersistentFlags().Lookup("manifest"))
