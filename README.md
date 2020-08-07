@@ -61,16 +61,16 @@ contains the Pulumi project you just created:
 
 ```console
 // For a Go project
-$ kube2pulumi go -d ./
+$ kube2pulumi go 
 
 // For a TypeScript project
-$ kube2pulumi typescript -d ./
+$ kube2pulumi typescript
 
 // For a Python project
-$ kube2pulumi python -d ./
+$ kube2pulumi python
 
 // For a C# project
-$ kube2pulumi C# -d ./
+$ kube2pulumi csharp
 ```
 
 This will generate a Pulumi  program that when run with `pulumi update` will deploy the
@@ -100,7 +100,7 @@ spec:
 ### Go
 
 ```console
-kube2pulumi go -m ./pod.yaml
+kube2pulumi go -f ./pod.yaml
 ```
 
 ```go
@@ -147,7 +147,7 @@ func main() {
 ### TypeScript
 
 ```console
-kube2pulumi typescript -m ./pod.yaml
+kube2pulumi typescript -f ./pod.yaml
 ```
 
 ```ts
@@ -179,7 +179,7 @@ const fooBarPod = new kubernetes.core.v1.Pod("fooBarPod", {
 ### Python
 
 ```console
-kube2pulumi python -m ./pod.yaml
+kube2pulumi python -f ./pod.yaml
 ```
 
 ```py
@@ -210,7 +210,7 @@ foo_bar_pod = kubernetes.core.v1.Pod("fooBarPod",
 ### C#
 
 ```console
-kube2pulumi C# -m ./pod.yaml
+kube2pulumi csharp -f ./pod.yaml
 ```
 
 ```cs
