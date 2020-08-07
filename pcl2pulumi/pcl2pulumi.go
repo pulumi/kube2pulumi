@@ -62,7 +62,7 @@ func buildTempFile(pcl string) (*os.File, error) {
 func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) error {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered:", r)
+			fmt.Println("unable to convert program:", r)
 		}
 	}()
 
