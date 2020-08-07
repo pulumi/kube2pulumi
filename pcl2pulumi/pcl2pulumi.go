@@ -60,6 +60,12 @@ func buildTempFile(pcl string) (*os.File, error) {
 
 // converts .pp file directly in the same directory as the input file
 func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) error {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("unable to convert program:", r)
+		}
+	}()
+
 	var generateProgram func(program *hcl2.Program) (map[string][]byte, hcl.Diagnostics, error)
 	var fileExt string
 	switch outputLanguage {
@@ -75,6 +81,8 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	case "go":
 		generateProgram = gogen.GenerateProgram
 		fileExt = ".go"
+	default:
+		return fmt.Errorf("language input is invalid\n")
 	}
 
 	parser := syntax.NewParser()

@@ -95,3 +95,20 @@ func TestDirk8sOperator(t *testing.T) {
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Directory is converted incorrectly")
 }
+
+func TestNamespaceTrailingComments(t *testing.T) {
+	assertion := assert.New(t)
+
+	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
+apiVersion = "v1"
+kind = "Namespace"
+# this is a trailing comment
+metadata = {
+name = "foo"
+}
+}
+`
+	result, err := ConvertFile("../testdata/NamespaceWithTrailingComment.yaml")
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "Comments are converted incorrectly")
+}

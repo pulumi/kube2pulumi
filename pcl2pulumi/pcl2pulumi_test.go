@@ -8,11 +8,9 @@ import (
 
 // TODO: https://github.com/pulumi/pulumi/issues/5101
 
-func TestPulumiPython(t *testing.T) {
-	namespacePy(t)
-}
+// PYTHON CODEGEN TESTS
 
-func namespacePy(t *testing.T) {
+func TestNamespacePy(t *testing.T) {
 	assertion := assert.New(t)
 
 	pyExpected := `import pulumi
@@ -37,11 +35,27 @@ foo = kubernetes.core.v1.Namespace("foo",
 	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
 }
 
-func TestPulumiTypeScript(t *testing.T) {
-	namespaceTs(t)
+func testOperatorPy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pyExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.py")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "python")
+	assertion.NoError(err)
+
+	py, err := ioutil.ReadFile("../testdata/k8sOperator/main.py")
+	assertion.NoError(err)
+
+	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
 }
 
-func namespaceTs(t *testing.T) {
+// TYPESCRIPT CODEGEN TESTS
+
+func TestNamespaceTs(t *testing.T) {
 	assertion := assert.New(t)
 
 	tsExpected := `import * as pulumi from "@pulumi/pulumi";
@@ -67,11 +81,27 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
 	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
 }
 
-func TestPulumiDotNet(t *testing.T) {
-	namespaceDotNet(t)
+func TestOperatorTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	tsExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.ts")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "nodejs")
+	assertion.NoError(err)
+
+	ts, err := ioutil.ReadFile("../testdata/k8sOperator/main.ts")
+	assertion.NoError(err)
+
+	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
 }
 
-func namespaceDotNet(t *testing.T) {
+// C# CODEGEN TESTS
+
+func TestNamespaceDotNet(t *testing.T) {
 	assertion := assert.New(t)
 
 	csExpected := `using Pulumi;
@@ -106,11 +136,27 @@ class MyStack : Stack
 	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
 }
 
-func TestPulumiGoLang(t *testing.T) {
-	namespaceGo(t)
+func testOperatorCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	csExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.cs")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "dotnet")
+	assertion.NoError(err)
+
+	cs, err := ioutil.ReadFile("../testdata/k8sOperator/main.cs")
+	assertion.NoError(err)
+
+	assertion.Equal(string(csExpected), string(cs), "dotnet operator codegen is incorrect")
 }
 
-func namespaceGo(t *testing.T) {
+// GOLANG CODEGEN TESTS
+
+func TestNamespaceGo(t *testing.T) {
 	assertion := assert.New(t)
 
 	goExpected := `package main
@@ -147,4 +193,22 @@ func main() {
 	assertion.NoError(err)
 
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
+}
+
+func TestOperatorGo(t *testing.T) {
+	assertion := assert.New(t)
+
+	goExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.go")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "go")
+	assertion.NoError(err)
+
+	_go, err := ioutil.ReadFile("../testdata/k8sOperator/main.go")
+	assertion.NoError(err)
+
+	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
 }

@@ -198,10 +198,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	case *ast.StringNode:
-		err = addComment(node, totalPCL)
-		if err != nil {
-			return err
-		}
 		if tk.Next == nil || tk.Next.Value != ":" {
 			s := n.String()
 			// Remove leading quote if present.
@@ -219,6 +215,10 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 			strVal := fmt.Sprintf("%q%s\n", s, suffix)
 			_, err = fmt.Fprintf(totalPCL, "%s", strVal)
+			if err != nil {
+				return err
+			}
+			err = addComment(node, totalPCL)
 			if err != nil {
 				return err
 			}
