@@ -18,7 +18,7 @@ func Command() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.go", result)
+			fmt.Printf("Conversion successful! Generated File: %s.go\n", result)
 			return nil
 		}}
 
