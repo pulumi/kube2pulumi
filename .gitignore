@@ -4,3 +4,7 @@ testdata/k8sOperator/main.go
 testdata/k8sOperator/main.py
 testdata/k8sOperator/main.ts
 .idea/
+testdata/Namespace.cs
+testdata/Namespace.py
+testdata/Namespace.ts
+testdata/Namespace.go

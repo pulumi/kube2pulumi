@@ -1,5 +1,4 @@
-apiVersion: v1
+apiVersion: v1 # this is a trailing comment
 kind: Namespace
-# this is a trailing comment
 metadata:
   name: foo
