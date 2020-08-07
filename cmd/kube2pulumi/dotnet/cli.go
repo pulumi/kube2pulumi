@@ -14,7 +14,7 @@ func Command() *cobra.Command {
 		Long: "convert k8s yaml to C#",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
-			filePath := viper.GetString("manifest")
+			filePath := viper.GetString("file")
 			result, err := util.RunConversion(dirPath, filePath, "dotnet")
 			if err != nil {
 				return err
