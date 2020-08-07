@@ -23,13 +23,13 @@ foo = kubernetes.core.v1.Namespace("foo",
         "name": "foo",
     })
 `
-	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "python")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "python")
 	assertion.NoError(err)
 
-	py, err := ioutil.ReadFile("../testdata/Namespace.py")
+	py, err := ioutil.ReadFile("../../testdata/Namespace.py")
 	assertion.NoError(err)
 
 	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
@@ -38,16 +38,16 @@ foo = kubernetes.core.v1.Namespace("foo",
 func testOperatorPy(t *testing.T) {
 	assertion := assert.New(t)
 
-	pyExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.py")
+	pyExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.py")
 	assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "python")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "python")
 	assertion.NoError(err)
 
-	py, err := ioutil.ReadFile("../testdata/k8sOperator/main.py")
+	py, err := ioutil.ReadFile("../../testdata/k8sOperator/main.py")
 	assertion.NoError(err)
 
 	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
@@ -69,13 +69,13 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
     },
 });
 `
-	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "nodejs")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "nodejs")
 	assertion.NoError(err)
 
-	ts, err := ioutil.ReadFile("../testdata/Namespace.ts")
+	ts, err := ioutil.ReadFile("../../testdata/Namespace.ts")
 	assertion.NoError(err)
 
 	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
@@ -84,16 +84,16 @@ const foo = new kubernetes.core.v1.Namespace("foo", {
 func TestOperatorTs(t *testing.T) {
 	assertion := assert.New(t)
 
-	tsExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.ts")
+	tsExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.ts")
 	assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "nodejs")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "nodejs")
 	assertion.NoError(err)
 
-	ts, err := ioutil.ReadFile("../testdata/k8sOperator/main.ts")
+	ts, err := ioutil.ReadFile("../../testdata/k8sOperator/main.ts")
 	assertion.NoError(err)
 
 	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
@@ -124,13 +124,13 @@ class MyStack : Stack
 
 }
 `
-	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "dotnet")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "dotnet")
 	assertion.NoError(err)
 
-	cs, err := ioutil.ReadFile("../testdata/Namespace.cs")
+	cs, err := ioutil.ReadFile("../../testdata/Namespace.cs")
 	assertion.NoError(err)
 
 	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
@@ -139,16 +139,16 @@ class MyStack : Stack
 func testOperatorCs(t *testing.T) {
 	assertion := assert.New(t)
 
-	csExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.cs")
+	csExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.cs")
 	assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "dotnet")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "dotnet")
 	assertion.NoError(err)
 
-	cs, err := ioutil.ReadFile("../testdata/k8sOperator/main.cs")
+	cs, err := ioutil.ReadFile("../../testdata/k8sOperator/main.cs")
 	assertion.NoError(err)
 
 	assertion.Equal(string(csExpected), string(cs), "dotnet operator codegen is incorrect")
@@ -183,13 +183,13 @@ func main() {
 	})
 }
 `
-	pcl, err := ioutil.ReadFile("../testdata/Namespace.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/Namespace", "go")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "go")
 	assertion.NoError(err)
 
-	_go, err := ioutil.ReadFile("../testdata/Namespace.go")
+	_go, err := ioutil.ReadFile("../../testdata/Namespace.go")
 	assertion.NoError(err)
 
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
@@ -198,16 +198,16 @@ func main() {
 func TestOperatorGo(t *testing.T) {
 	assertion := assert.New(t)
 
-	goExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.go")
+	goExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.go")
 	assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../testdata/expK8sOperator.pp")
+	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../testdata/k8sOperator/main", "go")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
 	assertion.NoError(err)
 
-	_go, err := ioutil.ReadFile("../testdata/k8sOperator/main.go")
+	_go, err := ioutil.ReadFile("../../testdata/k8sOperator/main.go")
 	assertion.NoError(err)
 
 	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
