@@ -5,11 +5,11 @@ class MyStack : Stack
 {
     public MyStack()
     {
-        var foo = new Kubernetes.Core.v1.Namespace("foo", new Kubernetes.Core.v1.NamespaceArgs
+        var foo = new Kubernetes.Core.V1.Namespace("foo", new Kubernetes.Types.Inputs.Core.V1.NamespaceArgs
         {
             ApiVersion = "v1",
             Kind = "Namespace",
-            Metadata = new Kubernetes.Meta.Inputs.ObjectMetaArgs
+            Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
             {
                 Name = "foo",
             },

@@ -1,1 +1,6 @@
 dist/
+testdata/k8sOperator/main.cs
+testdata/k8sOperator/main.go
+testdata/k8sOperator/main.py
+testdata/k8sOperator/main.ts
+.idea/

@@ -1,9 +1,10 @@
 package pcl2pulumi
 
 import (
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // TODO: https://github.com/pulumi/pulumi/issues/5101
@@ -35,7 +36,7 @@ foo = kubernetes.core.v1.Namespace("foo",
 	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
 }
 
-func testOperatorPy(t *testing.T) {
+func TestOperatorPy(t *testing.T) {
 	assertion := assert.New(t)
 
 	pyExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.py")
@@ -111,11 +112,11 @@ class MyStack : Stack
 {
     public MyStack()
     {
-        var foo = new Kubernetes.Core.v1.Namespace("foo", new Kubernetes.Core.v1.NamespaceArgs
+        var foo = new Kubernetes.Core.V1.Namespace("foo", new Kubernetes.Types.Inputs.Core.V1.NamespaceArgs
         {
             ApiVersion = "v1",
             Kind = "Namespace",
-            Metadata = new Kubernetes.Meta.Inputs.ObjectMetaArgs
+            Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
             {
                 Name = "foo",
             },
@@ -136,7 +137,7 @@ class MyStack : Stack
 	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
 }
 
-func testOperatorCs(t *testing.T) {
+func TestOperatorCs(t *testing.T) {
 	assertion := assert.New(t)
 
 	csExpected, err := ioutil.ReadFile("../testdata/k8sOperator/expectedMain.cs")
