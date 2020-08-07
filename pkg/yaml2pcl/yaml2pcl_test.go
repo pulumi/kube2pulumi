@@ -19,7 +19,7 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../testdata/Namespace.yaml")
+	result, err := ConvertFile("../../testdata/Namespace.yaml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Single resource conversion was incorrect")
 }
@@ -36,7 +36,7 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../testdata/NamespaceWithComments.yaml")
+	result, err := ConvertFile("../../testdata/NamespaceWithComments.yaml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
@@ -67,7 +67,7 @@ cpu = 0.2
 }
 }
 `
-	result, err := ConvertFile("../testdata/OnePodArray.yaml")
+	result, err := ConvertFile("../../testdata/OnePodArray.yaml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Nested array is converted incorrectly")
 }
@@ -75,11 +75,11 @@ cpu = 0.2
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "Role.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "Role.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile(filepath.Join("..", "testdata", "Role.yaml"))
+	result, err := ConvertFile(filepath.Join("../..", "testdata", "Role.yaml"))
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Role is converted incorrectly")
 }
@@ -87,11 +87,11 @@ func TestRole(t *testing.T) {
 func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "expK8sOperator.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "expK8sOperator.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertDirectory("../testdata/k8sOperator/")
+	result, err := ConvertDirectory("../../testdata/k8sOperator/")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Directory is converted incorrectly")
 }
@@ -108,7 +108,7 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../testdata/NamespaceWithTrailingComment.yaml")
+	result, err := ConvertFile("../../testdata/NamespaceWithTrailingComment.yaml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
@@ -124,18 +124,18 @@ func TestIncorrectPath(t *testing.T) {
 
 func TestMalformedHeaderYaml(t *testing.T) {
 	assertion := assert.New(t)
-	_, err := ConvertFile("../testdata/MalformedYaml.yaml")
+	_, err := ConvertFile("../../testdata/MalformedYaml.yaml")
 	assertion.Error(err)
 }
 
 func TestMultipleResourceGen(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "testdata", "MultipleResources.pcl"))
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "MultipleResources.pcl"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, _ := ConvertFile("../testdata/MultipleResources.yml")
+	result, _ := ConvertFile("../../testdata/MultipleResources.yml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "File with multiple resources is converted incorrectly")
 }
