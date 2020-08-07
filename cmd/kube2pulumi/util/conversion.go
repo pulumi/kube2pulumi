@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/pulumi/kube2pulumi/pcl2pulumi"
@@ -10,7 +11,11 @@ import (
 
 func RunConversion(dirPath string, filePath string, language string) (string, error) {
 	if filePath == "" && dirPath == "" {
-		return "", fmt.Errorf("must specify a path for a file or directory\n")
+		path, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("unable to detect working directory, must specify a path for a file or directory\n")
+		}
+		dirPath = path
 	}
 	if filePath != "" && dirPath != "" {
 		return "", fmt.Errorf("must specify EITHER a path for a file or directory, not both\n")
