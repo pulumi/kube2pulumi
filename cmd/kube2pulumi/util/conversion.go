@@ -24,9 +24,11 @@ func RunConversion(dirPath string, filePath string, language string) (string, er
 	var outPath string
 	var err error
 	// filepath only
+	var fileName string
 	if filePath != "" {
+		fileName = getOutputFile(filepath.Dir(filePath), language)
 		result, err = yaml2pcl.ConvertFile(filePath)
-		outPath, err = pcl2pulumi.Pcl2Pulumi(result, filePath, language)
+		outPath, err = pcl2pulumi.Pcl2Pulumi(result, fileName, language)
 		if err != nil {
 			return "", err
 		}
@@ -35,10 +37,27 @@ func RunConversion(dirPath string, filePath string, language string) (string, er
 		if err != nil {
 			return "", err
 		}
-		outPath, err = pcl2pulumi.Pcl2Pulumi(result, filepath.Join(dirPath, "main"), language)
+		fileName = getOutputFile(dirPath, language)
+		outPath, err = pcl2pulumi.Pcl2Pulumi(result, fileName, language)
 		if err != nil {
 			return "", err
 		}
 	}
 	return outPath, nil
+}
+
+func getOutputFile(dir, language string) string {
+	var fName string
+	switch language {
+	case "nodejs":
+		fName = "index"
+	case "python":
+		fName = "__main__"
+	case "dotnet":
+		fName = "Program"
+	case "go":
+		fName = "main"
+	}
+
+	return filepath.Join(dir, fName)
 }
