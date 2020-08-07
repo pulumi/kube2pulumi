@@ -101,8 +101,8 @@ func TestNamespaceTrailingComments(t *testing.T) {
 
 	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
-kind = "Namespace"
 # this is a trailing comment
+kind = "Namespace"
 metadata = {
 name = "foo"
 }
