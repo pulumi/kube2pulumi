@@ -1,6 +1,13 @@
 # kube2pulumi
 
-Convert Kubernetes yaml to Pulumi programs in Go, TypeScript, Python, and C#. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
+Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, and C#. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
+
+## Prerequisites
+1. [Pulumi CLI](https://pulumi.io/quickstart/install.html)
+2. Install the Pulumi Kubernetes plugin:
+```console
+# pulumi plugin install resource kubernetes v2.4.2
+```
 
 ## Building and Installation
 
@@ -22,7 +29,7 @@ into a directory that is on your path.
 
 ## Usage
 
-In order to use `kube2pulumi` to convert Kubernetes yaml to Pulumi and then deploy it,
+In order to use `kube2pulumi` to convert Kubernetes YAML to Pulumi and then deploy it,
 you'll first need to install the [Pulumi CLI](https://pulumi.io/quickstart/install.html). 
 
 Once the
@@ -32,7 +39,7 @@ Pulumi CLI has been installed, you'll need to install the Kubernetes plugin:
 $ pulumi plugin install resource kubernetes v2.4.2
 ```
 
-Now, navigate to the same directory as the the yaml you'd like to
+Now, navigate to the same directory as the the YAML you'd like to
 convert and create a new Pulumi stack in your favorite language:
 
 ```console
@@ -67,11 +74,11 @@ $ kube2pulumi C# -d ./
 ```
 
 This will generate a Pulumi  program that when run with `pulumi update` will deploy the
-Kubernetes resources originally described by your yaml. Note that before deployment you will need to [configure Kubernetes](https://www.pulumi.com/docs/intro/cloud-providers/kubernetes/setup/) so the Pulumi CLI can connect to a Kubernetes cluster. If you have previously configured the [kubectl CLI](https://kubernetes.io/docs/reference/kubectl/overview/), `kubectl`, Pulumi will respect and use your configuration settings.
+Kubernetes resources originally described by your YAML. Note that before deployment you will need to [configure Kubernetes](https://www.pulumi.com/docs/intro/cloud-providers/kubernetes/setup/) so the Pulumi CLI can connect to a Kubernetes cluster. If you have previously configured the [kubectl CLI](https://kubernetes.io/docs/reference/kubectl/overview/), `kubectl`, Pulumi will respect and use your configuration settings.
 
 ## Example
 
-Let's convert a simple yaml file describing a pod with a single container running nginx:
+Let's convert a simple YAML file describing a pod with a single container running nginx:
 
 ```yaml
 apiVersion: v1
