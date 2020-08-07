@@ -26,8 +26,8 @@ func configureCLI() *cobra.Command {
 	rootCmd.AddCommand(nodejs.Command())
 	rootCmd.AddCommand(dotnet.Command())
 
-	rootCmd.PersistentFlags().StringVarP(&manifestFile, "file", "f", "", "manifest file to convert")
-	viper.BindPFlag("manifest", rootCmd.PersistentFlags().Lookup("manifest"))
+	rootCmd.PersistentFlags().StringVarP(&manifestFile, "file", "f", "", "YAML file to convert")
+	viper.BindPFlag("file", rootCmd.PersistentFlags().Lookup("file"))
 
 	rootCmd.PersistentFlags().StringVarP(&directoryPath, "directory", "d", "", "file path for directory to convert")
 	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))

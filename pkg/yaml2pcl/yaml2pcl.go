@@ -55,8 +55,11 @@ func ConvertDirectory(dirName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	yamlFiles := 0
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".yaml") || strings.Contains(file.Name(), ".yml") {
+			yamlFiles++
 			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
 			if err != nil {
 				return "", err
@@ -66,6 +69,9 @@ func ConvertDirectory(dirName string) (string, error) {
 				return "", err
 			}
 		}
+	}
+	if yamlFiles == 0 {
+		return "", fmt.Errorf("unable to find any YAML files in directory: %s", dirName)
 	}
 	return buff.String(), nil
 }
