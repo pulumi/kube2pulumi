@@ -9,7 +9,7 @@ import (
 
 func Command() *cobra.Command {
 	command := &cobra.Command{
-		Use:  "C#",
+		Use:  "dotnet",
 		Long: "convert k8s yaml to C#",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
