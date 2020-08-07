@@ -6,7 +6,7 @@ Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, and C#. Im
 1. [Pulumi CLI](https://pulumi.io/quickstart/install.html)
 2. Install the Pulumi Kubernetes plugin:
 ```console
-# pulumi plugin install resource kubernetes v2.4.2
+$ pulumi plugin install resource kubernetes v2.4.2
 ```
 
 ## Building and Installation
