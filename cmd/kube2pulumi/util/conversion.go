@@ -32,6 +32,9 @@ func RunConversion(dirPath string, filePath string, language string) (string, er
 		}
 	} else { // dir only
 		result, err = yaml2pcl.ConvertDirectory(dirPath)
+		if err != nil {
+			return "", err
+		}
 		outPath, err = pcl2pulumi.Pcl2Pulumi(result, filepath.Join(dirPath, "main"), language)
 		if err != nil {
 			return "", err

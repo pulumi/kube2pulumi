@@ -135,7 +135,14 @@ func TestMultipleResourceGen(t *testing.T) {
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, _ := ConvertFile("../testdata/MultipleResources.yml")
+	result, err := ConvertFile("../testdata/MultipleResources.yml")
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "File with multiple resources is converted incorrectly")
+}
+
+func TestEmptyDir(t *testing.T) {
+	assertion := assert.New(t)
+	_, err := ConvertDirectory("../testdata/empty/")
+	assertion.Error(err)
+	assertion.Contains(err.Error(), "unable to find any YAML files")
 }
