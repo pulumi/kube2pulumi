@@ -259,7 +259,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
-		_, err = fmt.Fprintf(totalPCL, "%s", node)
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}

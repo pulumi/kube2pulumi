@@ -92,9 +92,10 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	}
 	if len(parser.Diagnostics) != 0 {
 		writer := parser.NewDiagnosticWriter(os.Stderr, 0, true)
-		err := writer.WriteDiagnostics(parser.Diagnostics)
+		_ = writer.WriteDiagnostics(parser.Diagnostics) // error is immediately printed out here
 		if parser.Diagnostics.HasErrors() {
-			return err
+			log.Println("Parser.Diagnostics has errors")
+			return parser.Diagnostics.Errs()[0] // janky
 		}
 	}
 	program, diags, err := hcl2.BindProgram(parser.Files)
