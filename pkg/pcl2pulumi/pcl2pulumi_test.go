@@ -1,7 +1,6 @@
 package pcl2pulumi
 
 import (
-	"github.com/pulumi/kube2pulumi/pkg/yaml2pcl"
 	"io/ioutil"
 	"testing"
 
@@ -99,14 +98,6 @@ func TestOperatorTs(t *testing.T) {
 	assertion.NoError(err)
 
 	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
-}
-
-func testCRDTs(t *testing.T) {
-	assertion := assert.New(t)
-	result, err := yaml2pcl.ConvertFile("../../testdata/customResourceDef.yaml")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(result, "../../testdata/customResourceDef.yaml", "nodejs")
 }
 
 // C# CODEGEN TESTS

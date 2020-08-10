@@ -1,7 +1,6 @@
 package yaml2pcl
 
 import (
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"testing"
@@ -146,17 +145,4 @@ func TestEmptyDir(t *testing.T) {
 	_, err := ConvertDirectory("../../testdata/empty/")
 	assertion.Error(err)
 	assertion.Contains(err.Error(), "unable to find any YAML files")
-}
-
-func testCRD(t *testing.T) {
-	assertion := assert.New(t)
-
-	//b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "MultipleResources.pcl"))
-	//assertion.NoError(err)
-	//expected := string(b)
-
-	result, err := ConvertFile("../../testdata/customResourceDef.yaml")
-	fmt.Println(result)
-	assertion.NoError(err)
-	//assertion.Equal(expected, result, "File with multiple resources is converted incorrectly")
 }
