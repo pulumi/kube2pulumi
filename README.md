@@ -257,7 +257,7 @@ class MyStack : Stack
 
 # Limitations
 
-`kube2pulumi` currently does not handle the conversion of CustomResourceDefinitions or CustomResources. However, 
+`kube2pulumi` [currently does not handle the conversion of CustomResourceDefinitions or CustomResources](https://github.com/pulumi/kube2pulumi/issues/20). However, 
 our new tool `crd2pulumi`, does just that! If using CRD/CR's make sure to check out the following tool!
 
 1. [crd2pulumi README](https://github.com/pulumi/pulumi-kubernetes/blob/master/provider/cmd/crd2pulumi/README.md)
