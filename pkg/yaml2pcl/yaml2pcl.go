@@ -177,7 +177,8 @@ func resourceName(nodes []ast.Node) string {
 		name = strings.ToUpper(string(name[0])) + name[1:]
 		return fmt.Sprintf("%s%s%s", ns, name, kind)
 	}
-	return fmt.Sprintf("%s%s", name, kind)
+
+	return strings.ReplaceAll(fmt.Sprintf("%s%s", name, kind), ".", "_")
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
@@ -272,7 +273,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
-		_, err = fmt.Fprintf(totalPCL, "%s", node)
+		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
 			return err
 		}
