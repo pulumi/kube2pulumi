@@ -1,6 +1,7 @@
 package pcl2pulumi
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -91,9 +92,13 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 		return err
 	}
 	if len(parser.Diagnostics) != 0 {
-		writer := parser.NewDiagnosticWriter(os.Stderr, 0, true)
+		var diagOutput bytes.Buffer
+		writer := parser.NewDiagnosticWriter(&diagOutput, 0, true)
 		err := writer.WriteDiagnostics(parser.Diagnostics)
 		if parser.Diagnostics.HasErrors() {
+			return fmt.Errorf(diagOutput.String())
+		}
+		if err != nil {
 			return err
 		}
 	}
@@ -103,9 +108,13 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 		return err
 	}
 	if len(diags) != 0 {
-		writer := program.NewDiagnosticWriter(os.Stderr, 0, true)
+		var diagOutput bytes.Buffer
+		writer := program.NewDiagnosticWriter(&diagOutput, 0, true)
 		err := writer.WriteDiagnostics(diags)
 		if diags.HasErrors() {
+			return fmt.Errorf(diagOutput.String())
+		}
+		if err != nil {
 			return err
 		}
 	}
@@ -116,9 +125,13 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 		return err
 	}
 	if len(diags) != 0 {
-		writer := program.NewDiagnosticWriter(os.Stderr, 0, true)
+		var diagOutput bytes.Buffer
+		writer := program.NewDiagnosticWriter(&diagOutput, 0, true)
 		err = writer.WriteDiagnostics(diags)
 		if diags.HasErrors() {
+			return fmt.Errorf(diagOutput.String())
+		}
+		if err != nil {
 			return err
 		}
 	}

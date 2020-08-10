@@ -25,7 +25,7 @@ func Command() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.js\n", nodejs)
+			fmt.Printf("Conversion successful! Generated File: %s.ts\n", nodejs)
 
 			dotnet, err := util.RunConversion(dirPath, filePath, "dotnet")
 			if err != nil {
