@@ -343,8 +343,11 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 
 		key := n.Key.String()
 		// trim surrounding quotations if there
-		key = strings.TrimPrefix(key, "\"")
-		key = strings.TrimSuffix(key, "\"")
+		if len(key) >= 2 {
+			if key[0] == '"' && key[len(key)-1] == '"' {
+				key = key[1 : len(key)-1]
+			}
+		}
 
 		if strings.Contains(key, "/") || strings.Contains(key, ".") {
 			_, err = fmt.Fprintf(totalPCL, "%q = ", key)
