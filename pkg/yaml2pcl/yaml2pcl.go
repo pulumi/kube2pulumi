@@ -341,7 +341,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return nil
 		}
 		if strings.Contains(n.Key.String(), "/") || strings.Contains(n.Key.String(), ".") {
-			_, err = fmt.Fprintf(totalPCL, "\"%s\" = ", n.Key)
+			_, err = fmt.Fprintf(totalPCL, "%q = ", n.Key)
 		} else {
 			_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
 		}
