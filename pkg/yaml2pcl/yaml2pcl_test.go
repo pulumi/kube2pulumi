@@ -157,3 +157,15 @@ func TestAnnotationsDeployment(t *testing.T) {
 	result, err := ConvertFile("../../testdata/testDep.yaml")
 	assertion.Equal(expected, result, "pcl is incorrect")
 }
+
+func TestNoDoubleQuotes(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "doubleQuotes.pp"))
+	assertion.NoError(err)
+	expected := string(b)
+
+	result, err := ConvertFile("../../testdata/doubleQuotes.yaml")
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "double quotes inserted")
+}
