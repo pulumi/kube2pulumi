@@ -4,7 +4,6 @@ package yaml2pcl
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -338,7 +337,14 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 		}
-		_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
+		if n.Value.Type() == ast.LiteralType {
+			return nil
+		}
+		if strings.Contains(n.Key.String(), "/") || strings.Contains(n.Key.String(), ".") {
+			_, err = fmt.Fprintf(totalPCL, "\"%s\" = ", n.Key)
+		} else {
+			_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
+		}
 		if err != nil {
 			return err
 		}
@@ -420,8 +426,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		if err != nil {
 			return err
 		}
+	case *ast.LiteralNode:
 	default:
-		return errors.New("unexpected node type: " + n.Type().String())
+		return fmt.Errorf("unexpected node type: " + n.Type().String())
 	}
 
 	return nil
