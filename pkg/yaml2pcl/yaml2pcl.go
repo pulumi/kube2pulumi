@@ -340,7 +340,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		if n.Value.Type() == ast.LiteralType {
 			return nil
 		}
-		if strings.Contains(n.Key.String(), "/") || strings.Contains(n.Key.String(), ".") {
+		if !strings.Contains(n.Key.String(), "\"") && (strings.Contains(n.Key.String(), "/") || strings.Contains(n.Key.String(), ".")) {
 			_, err = fmt.Fprintf(totalPCL, "%q = ", n.Key)
 		} else {
 			_, err = fmt.Fprintf(totalPCL, "%s = ", n.Key)
