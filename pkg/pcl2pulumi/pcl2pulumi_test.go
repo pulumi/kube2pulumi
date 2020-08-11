@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO: https://github.com/pulumi/pulumi/issues/5101
-
 // PYTHON CODEGEN TESTS
 
 func TestNamespacePy(t *testing.T) {
