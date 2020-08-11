@@ -7,8 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TODO: https://github.com/pulumi/pulumi/issues/5101
-
 // PYTHON CODEGEN TESTS
 
 func TestNamespacePy(t *testing.T) {
@@ -212,4 +210,14 @@ func TestOperatorGo(t *testing.T) {
 	assertion.NoError(err)
 
 	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
+}
+
+func TestMinRepro(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
+	assertion.NoError(err)
 }
