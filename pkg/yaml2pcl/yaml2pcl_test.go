@@ -146,3 +146,14 @@ func TestEmptyDir(t *testing.T) {
 	assertion.Error(err)
 	assertion.Contains(err.Error(), "unable to find any YAML files")
 }
+
+func TestAnnotationsDeployment(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "testDep.pp"))
+	assertion.NoError(err)
+	expected := string(b)
+
+	result, err := ConvertFile("../../testdata/testDep.yaml")
+	assertion.Equal(expected, result, "pcl is incorrect")
+}
