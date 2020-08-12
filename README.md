@@ -2,6 +2,9 @@
 
 Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, and C#. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
 
+## Live Demo
+Check out the [kube2pulumi web app](https://www.pulumi.com/kube2pulumi/) to see `kube2pulumi` in action in from browser.
+
 ## Prerequisites
 1. [Pulumi CLI](https://pulumi.io/quickstart/install.html)
 2. Install the Pulumi Kubernetes plugin:
