@@ -5,6 +5,7 @@ package yaml2pcl
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"io"
 	"io/ioutil"
 	"path/filepath"
@@ -349,7 +350,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 
-		if strings.Contains(key, "/") || strings.Contains(key, ".") {
+		// NEED TO CHECK FOR ALL VALID PCL CHARACTERS AND CHECK AGAINST THAT TO DETERMINE WHETHER
+		// OR NOT THE KEY NEEDS TO BE QUOTED
+		if !hclsyntax.ValidIdentifier(key) {
 			_, err = fmt.Fprintf(totalPCL, "%q = ", key)
 		} else {
 			_, err = fmt.Fprintf(totalPCL, "%s = ", key)

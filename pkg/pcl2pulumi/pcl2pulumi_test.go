@@ -221,3 +221,13 @@ func TestMinRepro(t *testing.T) {
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
 	assertion.NoError(err)
 }
+
+func TestSpecialChar(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "go")
+	assertion.NoError(err)
+}
