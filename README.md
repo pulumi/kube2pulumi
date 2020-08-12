@@ -14,6 +14,12 @@ $ pulumi plugin install resource kubernetes v2.4.2
 If you wish to use `kube2pulumi` without developing the tool itself, you can use one of the [binary
 releases](https://github.com/pulumi/kube2pulumi/releases) hosted on GitHub.
 
+### Homebrew
+`kube2pulumi` can be installed on Mac from the Pulumi Homebrew tap.
+```console
+brew install pulumi/tap/kube2pulumi
+```
+
 
 kube2pulumi uses [Go modules](https://github.com/golang/go/wiki/Modules) to manage dependencies. If you want to develop `kube2pulumi` itself, you'll need to have [Go](https://golang.org/)  installed in order to build.
 Once this prerequisite is installed, run the following to build the `kube2pulumi` binary and install it into `$GOPATH/bin`:
