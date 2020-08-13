@@ -52,13 +52,13 @@ func TestOperatorPy(t *testing.T) {
 	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
 }
 
-func TestMinReproPy(t *testing.T) {
+func TestDoubleQuotesPy(t *testing.T) {
 	assertion := assert.New(t)
 
 	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "python")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "python")
 	assertion.NoError(err)
 }
 
@@ -118,13 +118,13 @@ func TestOperatorTs(t *testing.T) {
 	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
 }
 
-func TestMinReproTs(t *testing.T) {
+func TestDoubleQuotesTs(t *testing.T) {
 	assertion := assert.New(t)
 
 	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "nodejs")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "nodejs")
 	assertion.NoError(err)
 }
 
@@ -193,13 +193,13 @@ func TestOperatorCs(t *testing.T) {
 	assertion.Equal(string(csExpected), string(cs), "dotnet operator codegen is incorrect")
 }
 
-func TestMinReproCs(t *testing.T) {
+func TestDoubleQuotesCs(t *testing.T) {
 	assertion := assert.New(t)
 
 	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "dotnet")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "dotnet")
 	assertion.NoError(err)
 }
 
@@ -272,13 +272,13 @@ func TestOperatorGo(t *testing.T) {
 	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
 }
 
-func TestMinRepro(t *testing.T) {
+func TestDoubleQuotesGo(t *testing.T) {
 	assertion := assert.New(t)
 
 	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "go")
 	assertion.NoError(err)
 }
 
