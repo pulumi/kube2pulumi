@@ -52,6 +52,26 @@ func TestOperatorPy(t *testing.T) {
 	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
 }
 
+func TestDoubleQuotesPy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "python")
+	assertion.NoError(err)
+}
+
+func TestSpecialCharPy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "python")
+	assertion.NoError(err)
+}
+
 // TYPESCRIPT CODEGEN TESTS
 
 func TestNamespaceTs(t *testing.T) {
@@ -96,6 +116,26 @@ func TestOperatorTs(t *testing.T) {
 	assertion.NoError(err)
 
 	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
+}
+
+func TestDoubleQuotesTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "nodejs")
+	assertion.NoError(err)
+}
+
+func TestSpecialCharTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "nodejs")
+	assertion.NoError(err)
 }
 
 // C# CODEGEN TESTS
@@ -151,6 +191,26 @@ func TestOperatorCs(t *testing.T) {
 	assertion.NoError(err)
 
 	assertion.Equal(string(csExpected), string(cs), "dotnet operator codegen is incorrect")
+}
+
+func TestDoubleQuotesCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "dotnet")
+	assertion.NoError(err)
+}
+
+func TestSpecialCharCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "dotnet")
+	assertion.NoError(err)
 }
 
 // GOLANG CODEGEN TESTS
@@ -212,12 +272,22 @@ func TestOperatorGo(t *testing.T) {
 	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
 }
 
-func TestMinRepro(t *testing.T) {
+func TestDoubleQuotesGo(t *testing.T) {
 	assertion := assert.New(t)
 
 	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
 	assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "go")
+	assertion.NoError(err)
+}
+
+func TestSpecialCharGo(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "go")
 	assertion.NoError(err)
 }
