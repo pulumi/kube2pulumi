@@ -181,3 +181,15 @@ func TestSpecialChar(t *testing.T) {
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "double quotes inserted")
 }
+
+func TestMultiLineString(t *testing.T) {
+	assertion := assert.New(t)
+
+	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "MultilineString.pp"))
+	assertion.NoError(err)
+	expected := string(b)
+
+	result, err := ConvertFile("../../testdata/MultilineString.yaml")
+	assertion.NoError(err)
+	assertion.Equal(expected, result, "incorrectly parses multiline strings")
+}

@@ -353,10 +353,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 		}
-		//if n.Value.Type() == ast.LiteralType {
-		//	return nil
-		//}
-
 		key := n.Key.String()
 		// trim surrounding quotations if there
 		if len(key) >= 2 {
