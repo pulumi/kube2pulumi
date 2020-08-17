@@ -191,6 +191,21 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 
 	tk := node.GetToken()
 	switch n := node.(type) {
+	case *ast.LiteralNode:
+		multLine := node.String()
+		multLine = strings.TrimPrefix(multLine, "|")
+		multLine = strings.TrimSpace(multLine)
+		_, err = fmt.Fprintf(totalPCL, "<<EOF\n%s\nEOF\n", multLine)
+		if err != nil {
+			return err
+		}
+		comment := addComment(node)
+		if comment != "" {
+			_, err = fmt.Fprintf(totalPCL, "%s", comment)
+			if err != nil {
+				return err
+			}
+		}
 	case *ast.NullNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
 		if err != nil {
@@ -338,9 +353,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 		}
-		if n.Value.Type() == ast.LiteralType {
-			return nil
-		}
+		//if n.Value.Type() == ast.LiteralType {
+		//	return nil
+		//}
 
 		key := n.Key.String()
 		// trim surrounding quotations if there
@@ -436,7 +451,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		if err != nil {
 			return err
 		}
-	case *ast.LiteralNode:
 	default:
 		return fmt.Errorf("unexpected node type: " + n.Type().String())
 	}

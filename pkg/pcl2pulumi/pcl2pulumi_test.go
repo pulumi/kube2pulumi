@@ -72,6 +72,16 @@ func TestSpecialCharPy(t *testing.T) {
 	assertion.NoError(err)
 }
 
+func TestMultiLinePy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "python")
+	assertion.NoError(err)
+}
+
 // TYPESCRIPT CODEGEN TESTS
 
 func TestNamespaceTs(t *testing.T) {
@@ -135,6 +145,16 @@ func TestSpecialCharTs(t *testing.T) {
 	assertion.NoError(err)
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "nodejs")
+	assertion.NoError(err)
+}
+
+func TestMultiLineTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "nodejs")
 	assertion.NoError(err)
 }
 
@@ -210,6 +230,16 @@ func TestSpecialCharCs(t *testing.T) {
 	assertion.NoError(err)
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "dotnet")
+	assertion.NoError(err)
+}
+
+func TestMultiLineCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "dotnet")
 	assertion.NoError(err)
 }
 
@@ -289,5 +319,15 @@ func TestSpecialCharGo(t *testing.T) {
 	assertion.NoError(err)
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "go")
+	assertion.NoError(err)
+}
+
+func TestMultiLineGo(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "go")
 	assertion.NoError(err)
 }
