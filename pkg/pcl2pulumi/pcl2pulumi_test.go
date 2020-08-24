@@ -72,6 +72,34 @@ func TestSpecialCharPy(t *testing.T) {
 	assertion.NoError(err)
 }
 
+func TestAnnotationsPy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "python")
+	assertion.NoError(err)
+}
+
+func TestMultiLineStringPy(t *testing.T) {
+	assertion := assert.New(t)
+
+	pyExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.py")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "python")
+	assertion.NoError(err)
+
+	py, err := ioutil.ReadFile("../../testdata/MultilineString.py")
+	assertion.NoError(err)
+
+	assertion.Equal(string(pyExpected), string(py), "multiline gen is incorrect")
+}
+
 // TYPESCRIPT CODEGEN TESTS
 
 func TestNamespaceTs(t *testing.T) {
@@ -136,6 +164,34 @@ func TestSpecialCharTs(t *testing.T) {
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "nodejs")
 	assertion.NoError(err)
+}
+
+func TestAnnotationsTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "nodejs")
+	assertion.NoError(err)
+}
+
+func TestMultiLineStringTs(t *testing.T) {
+	assertion := assert.New(t)
+
+	tsExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.ts")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "nodejs")
+	assertion.NoError(err)
+
+	ts, err := ioutil.ReadFile("../../testdata/MultilineString.ts")
+	assertion.NoError(err)
+
+	assertion.Equal(string(tsExpected), string(ts), "multiline gen is incorrect")
 }
 
 // C# CODEGEN TESTS
@@ -211,6 +267,34 @@ func TestSpecialCharCs(t *testing.T) {
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "dotnet")
 	assertion.NoError(err)
+}
+
+func TestAnnotationsCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "dotnet")
+	assertion.NoError(err)
+}
+
+func TestMultiLineStringCs(t *testing.T) {
+	assertion := assert.New(t)
+
+	csExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.cs")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "dotnet")
+	assertion.NoError(err)
+
+	cs, err := ioutil.ReadFile("../../testdata/MultilineString.cs")
+	assertion.NoError(err)
+
+	assertion.Equal(string(csExpected), string(cs), "multiline gen is incorrect")
 }
 
 // GOLANG CODEGEN TESTS
@@ -290,4 +374,32 @@ func TestSpecialCharGo(t *testing.T) {
 
 	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "go")
 	assertion.NoError(err)
+}
+
+func TestAnnotationsGo(t *testing.T) {
+	assertion := assert.New(t)
+
+	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "go")
+	assertion.NoError(err)
+}
+
+func TestMultiLineStringGo(t *testing.T) {
+	assertion := assert.New(t)
+
+	goExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.go")
+	assertion.NoError(err)
+
+	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
+	assertion.NoError(err)
+
+	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "go")
+	assertion.NoError(err)
+
+	_go, err := ioutil.ReadFile("../../testdata/MultilineString.go")
+	assertion.NoError(err)
+
+	assertion.Equal(string(goExpected), string(_go), "multiline gen is incorrect")
 }
