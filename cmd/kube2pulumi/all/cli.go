@@ -19,25 +19,25 @@ func Command() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.py\n", python)
+			fmt.Printf("Conversion successful! Generated File: %s\n", python)
 
-			nodejs, err := util.RunConversion(dirPath, filePath, "nodejs")
+			typescript, err := util.RunConversion(dirPath, filePath, "typescript")
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.ts\n", nodejs)
+			fmt.Printf("Conversion successful! Generated File: %s\n", typescript)
 
-			dotnet, err := util.RunConversion(dirPath, filePath, "dotnet")
+			csharp, err := util.RunConversion(dirPath, filePath, "csharp")
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.cs\n", dotnet)
+			fmt.Printf("Conversion successful! Generated File: %s\n", csharp)
 
 			golang, err := util.RunConversion(dirPath, filePath, "go")
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.go\n", golang)
+			fmt.Printf("Conversion successful! Generated File: %s\n", golang)
 			return nil
 		}}
 
