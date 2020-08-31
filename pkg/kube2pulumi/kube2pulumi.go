@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 )
 
-func Kube2PulumiFile(filePathAndName string, language string) (string, error) {
-	pcl, err := yaml2pcl.ConvertFile(filePathAndName)
+func Kube2PulumiFile(filePath string, language string) (string, error) {
+	pcl, err := yaml2pcl.ConvertFile(filePath)
 	if err != nil {
 		return "", err
 	}
-	outFile, err := pcl2pulumi.Pcl2Pulumi(pcl, filePathAndName, language)
+	outPath := getOutputFile(filepath.Dir(filePath), language)
+	outFile, err := pcl2pulumi.Pcl2Pulumi(pcl, outPath, language)
 	if err != nil {
 		return "", err
 	}
