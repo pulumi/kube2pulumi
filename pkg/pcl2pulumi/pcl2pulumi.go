@@ -20,7 +20,7 @@ import (
 	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
 )
 
-// generates pulumi program for specified type given the input stream
+// generates pulumi program for specified language type given the input stream (pcl)
 func Pcl2Pulumi(pcl string, outputFilePathAndName string, language string) (string, error) {
 	pclFile, err := buildTempFile(pcl)
 	if err != nil {

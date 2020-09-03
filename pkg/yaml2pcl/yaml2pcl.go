@@ -32,6 +32,15 @@ func ConvertFile(filename string) (string, error) {
 	return convert(*testFiles)
 }
 
+// ConvertDirectory returns a string conversion of the input directory with
+// YAML manifests into PCL: sample below
+// Output: resource foo "kubernetes:core/v1:Namespace" {
+// apiVersion = "v1"
+// kind = "Namespace"
+// metadata = {
+// name = "foo"
+// }
+// }
 func ConvertDirectory(dirName string) (string, error) {
 	var buff bytes.Buffer
 	files, err := ioutil.ReadDir(dirName)
