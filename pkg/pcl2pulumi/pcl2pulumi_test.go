@@ -1,405 +1,124 @@
 package pcl2pulumi
 
 import (
+	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// PYTHON CODEGEN TESTS
+func getLangs() map[string]string {
+	return map[string]string{
+		"python":     ".py",
+		"typescript": ".ts",
+		"csharp":     ".cs",
+		"go":         ".go",
+	}
+}
 
-func TestNamespacePy(t *testing.T) {
+// GENERALIZED TESTS
+
+func TestDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
 
-	pyExpected := `import pulumi
-import pulumi_kubernetes as kubernetes
+	for language := range langs {
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
+		assertion.NoError(err)
 
-foo = kubernetes.core.v1.Namespace("foo",
-    api_version="v1",
-    kind="Namespace",
-    metadata={
-        "name": "foo",
-    })
-`
-	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "python")
-	assertion.NoError(err)
-
-	py, err := ioutil.ReadFile("../../testdata/Namespace.py")
-	assertion.NoError(err)
-
-	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
+		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "doubleQuotes"), language)
+		assertion.NoError(err)
+	}
 }
 
-func TestOperatorPy(t *testing.T) {
+func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
+	for language := range langs {
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
+		assertion.NoError(err)
 
-	pyExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.py")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "python")
-	assertion.NoError(err)
-
-	py, err := ioutil.ReadFile("../../testdata/k8sOperator/main.py")
-	assertion.NoError(err)
-
-	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
+		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "specialChar"), language)
+		assertion.NoError(err)
+	}
 }
 
-func TestDoubleQuotesPy(t *testing.T) {
+func TestAnnotations(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
+	for language := range langs {
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
+		assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "python")
-	assertion.NoError(err)
+		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "testDep"), language)
+		assertion.NoError(err)
+	}
 }
 
-func TestSpecialCharPy(t *testing.T) {
+func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
 
-	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
-	assertion.NoError(err)
+	for language, ext := range langs {
+		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+			"expNamespace", fmt.Sprintf("expectedNamespace%s", ext)))
+		assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "python")
-	assertion.NoError(err)
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "Namespace.pp"))
+		assertion.NoError(err)
+
+		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "Namespace"), language)
+		assertion.NoError(err)
+
+		generated, err := ioutil.ReadFile(outPath)
+		assertion.NoError(err)
+
+		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+	}
 }
 
-func TestAnnotationsPy(t *testing.T) {
+func TestOperator(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
 
-	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
-	assertion.NoError(err)
+	for language, ext := range langs {
+		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
+		assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "python")
-	assertion.NoError(err)
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
+		assertion.NoError(err)
+
+		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "k8sOperator", "main"), language)
+		assertion.NoError(err)
+
+		generated, err := ioutil.ReadFile(outPath)
+		assertion.NoError(err)
+
+		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+	}
 }
 
-func TestMultiLineStringPy(t *testing.T) {
+func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
+	langs := getLangs()
 
-	pyExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.py")
-	assertion.NoError(err)
+	for language, ext := range langs {
+		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+			fmt.Sprintf("expectedMultilineString%s", ext)))
+		assertion.NoError(err)
 
-	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
-	assertion.NoError(err)
+		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
+		assertion.NoError(err)
 
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "python")
-	assertion.NoError(err)
+		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "MultilineString"), language)
+		assertion.NoError(err)
 
-	py, err := ioutil.ReadFile("../../testdata/MultilineString.py")
-	assertion.NoError(err)
+		generated, err := ioutil.ReadFile(outPath)
+		assertion.NoError(err)
 
-	assertion.Equal(string(pyExpected), string(py), "multiline gen is incorrect")
-}
-
-// TYPESCRIPT CODEGEN TESTS
-
-func TestNamespaceTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	tsExpected := `import * as pulumi from "@pulumi/pulumi";
-import * as kubernetes from "@pulumi/kubernetes";
-
-const foo = new kubernetes.core.v1.Namespace("foo", {
-    apiVersion: "v1",
-    kind: "Namespace",
-    metadata: {
-        name: "foo",
-    },
-});
-`
-	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "nodejs")
-	assertion.NoError(err)
-
-	ts, err := ioutil.ReadFile("../../testdata/Namespace.ts")
-	assertion.NoError(err)
-
-	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
-}
-
-func TestOperatorTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	tsExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.ts")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "nodejs")
-	assertion.NoError(err)
-
-	ts, err := ioutil.ReadFile("../../testdata/k8sOperator/main.ts")
-	assertion.NoError(err)
-
-	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
-}
-
-func TestDoubleQuotesTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "nodejs")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "nodejs")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "nodejs")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	tsExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.ts")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "nodejs")
-	assertion.NoError(err)
-
-	ts, err := ioutil.ReadFile("../../testdata/MultilineString.ts")
-	assertion.NoError(err)
-
-	assertion.Equal(string(tsExpected), string(ts), "multiline gen is incorrect")
-}
-
-// C# CODEGEN TESTS
-
-func TestNamespaceDotNet(t *testing.T) {
-	assertion := assert.New(t)
-
-	csExpected := `using Pulumi;
-using Kubernetes = Pulumi.Kubernetes;
-
-class MyStack : Stack
-{
-    public MyStack()
-    {
-        var foo = new Kubernetes.Core.V1.Namespace("foo", new Kubernetes.Types.Inputs.Core.V1.NamespaceArgs
-        {
-            ApiVersion = "v1",
-            Kind = "Namespace",
-            Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
-            {
-                Name = "foo",
-            },
-        });
-    }
-
-}
-`
-	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "dotnet")
-	assertion.NoError(err)
-
-	cs, err := ioutil.ReadFile("../../testdata/Namespace.cs")
-	assertion.NoError(err)
-
-	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
-}
-
-func TestOperatorCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	csExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.cs")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "dotnet")
-	assertion.NoError(err)
-
-	cs, err := ioutil.ReadFile("../../testdata/k8sOperator/main.cs")
-	assertion.NoError(err)
-
-	assertion.Equal(string(csExpected), string(cs), "dotnet operator codegen is incorrect")
-}
-
-func TestDoubleQuotesCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "dotnet")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "dotnet")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "dotnet")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	csExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.cs")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "dotnet")
-	assertion.NoError(err)
-
-	cs, err := ioutil.ReadFile("../../testdata/MultilineString.cs")
-	assertion.NoError(err)
-
-	assertion.Equal(string(csExpected), string(cs), "multiline gen is incorrect")
-}
-
-// GOLANG CODEGEN TESTS
-
-func TestNamespaceGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	goExpected := `package main
-
-import (
-	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
-	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
-	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
-)
-
-func main() {
-	pulumi.Run(func(ctx *pulumi.Context) error {
-		_, err := corev1.NewNamespace(ctx, "foo", &corev1.NamespaceArgs{
-			ApiVersion: pulumi.String("v1"),
-			Kind:       pulumi.String("Namespace"),
-			Metadata: &metav1.ObjectMetaArgs{
-				Name: pulumi.String("foo"),
-			},
-		})
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-}
-`
-	pcl, err := ioutil.ReadFile("../../testdata/Namespace.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/Namespace", "go")
-	assertion.NoError(err)
-
-	_go, err := ioutil.ReadFile("../../testdata/Namespace.go")
-	assertion.NoError(err)
-
-	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
-}
-
-func TestOperatorGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	goExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.go")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/expK8sOperator.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/k8sOperator/main", "go")
-	assertion.NoError(err)
-
-	_go, err := ioutil.ReadFile("../../testdata/k8sOperator/main.go")
-	assertion.NoError(err)
-
-	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
-}
-
-func TestDoubleQuotesGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/doubleQuotes.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/doubleQuotes", "go")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/specialChar.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/specialChar", "go")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	pcl, err := ioutil.ReadFile("../../testdata/testDep.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/testDep", "go")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	goExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.go")
-	assertion.NoError(err)
-
-	pcl, err := ioutil.ReadFile("../../testdata/MultilineString.pp")
-	assertion.NoError(err)
-
-	_, err = Pcl2Pulumi(string(pcl), "../../testdata/MultilineString", "go")
-	assertion.NoError(err)
-
-	_go, err := ioutil.ReadFile("../../testdata/MultilineString.go")
-	assertion.NoError(err)
-
-	assertion.Equal(string(goExpected), string(_go), "multiline gen is incorrect")
+		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+	}
 }

@@ -1,4 +1,4 @@
-package nodejs
+package typescript
 
 import (
 	"fmt"
@@ -15,11 +15,11 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("file")
-			result, err := util.RunConversion(dirPath, filePath, "nodejs")
+			result, err := util.RunConversion(dirPath, filePath, "typescript")
 			if err != nil {
 				return err
 			}
-			fmt.Printf("Conversion successful! Generated File: %s.ts\n", result)
+			fmt.Printf("Conversion successful! Generated File: %s\n", result)
 			return nil
 		}}
 

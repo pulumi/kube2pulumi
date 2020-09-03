@@ -20,8 +20,8 @@ import (
 	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
 )
 
-// generates pulumi program for specified type given the input stream
-func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) (string, error) {
+// generates pulumi program for specified language type given the input stream (pcl)
+func Pcl2Pulumi(pcl string, outputFilePathAndName string, language string) (string, error) {
 	pclFile, err := buildTempFile(pcl)
 	if err != nil {
 		return "", err
@@ -32,7 +32,7 @@ func Pcl2Pulumi(pcl string, outputFilePathAndName string, output string) (string
 	dir, fileName := filepath.Split(outputFilePathAndName)
 	fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
 	outPath := fmt.Sprintf("%s%s", dir, fileName)
-	err = convertPulumi(pclFile, outPath, output)
+	outPath, err = convertPulumi(pclFile, outPath, language)
 	if err != nil {
 		return "", err
 	}
@@ -60,7 +60,7 @@ func buildTempFile(pcl string) (*os.File, error) {
 }
 
 // converts .pp file directly in the same directory as the input file
-func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) error {
+func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (string, error) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("unable to convert program:", r)
@@ -70,69 +70,69 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	var generateProgram func(program *hcl2.Program) (map[string][]byte, hcl.Diagnostics, error)
 	var fileExt string
 	switch outputLanguage {
-	case "nodejs":
+	case "typescript", "javascript":
 		generateProgram = tsgen.GenerateProgram
 		fileExt = ".ts"
 	case "python":
 		generateProgram = pygen.GenerateProgram
 		fileExt = ".py"
-	case "dotnet":
+	case "csharp":
 		generateProgram = csgen.GenerateProgram
 		fileExt = ".cs"
 	case "go":
 		generateProgram = gogen.GenerateProgram
 		fileExt = ".go"
 	default:
-		return fmt.Errorf("language input is invalid\n")
+		return "", fmt.Errorf("language input is invalid\n")
 	}
 
 	parser := syntax.NewParser()
 	if err := parseFile(parser, ppFile.Name()); err != nil {
 		log.Printf("failed to parse %v", ppFile.Name())
-		return err
+		return "", err
 	}
 	if len(parser.Diagnostics) != 0 {
 		var diagOutput bytes.Buffer
 		writer := parser.NewDiagnosticWriter(&diagOutput, 0, true)
 		err := writer.WriteDiagnostics(parser.Diagnostics)
 		if parser.Diagnostics.HasErrors() {
-			return fmt.Errorf(diagOutput.String())
+			return "", fmt.Errorf(diagOutput.String())
 		}
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 	program, diags, err := hcl2.BindProgram(parser.Files)
 	if err != nil {
 		log.Print("failed to bind program: ")
-		return err
+		return "", err
 	}
 	if len(diags) != 0 {
 		var diagOutput bytes.Buffer
 		writer := program.NewDiagnosticWriter(&diagOutput, 0, true)
 		err := writer.WriteDiagnostics(diags)
 		if diags.HasErrors() {
-			return fmt.Errorf(diagOutput.String())
+			return "", fmt.Errorf(diagOutput.String())
 		}
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
 	files, diags, err := generateProgram(program)
 	if err != nil {
 		log.Print("failed to generate program: ")
-		return err
+		return "", err
 	}
 	if len(diags) != 0 {
 		var diagOutput bytes.Buffer
 		writer := program.NewDiagnosticWriter(&diagOutput, 0, true)
 		err = writer.WriteDiagnostics(diags)
 		if diags.HasErrors() {
-			return fmt.Errorf(diagOutput.String())
+			return "", fmt.Errorf(diagOutput.String())
 		}
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
@@ -146,10 +146,10 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) e
 	for _, p := range fpaths {
 		if err := ioutil.WriteFile(outputFileName, files[p], 0600); err != nil {
 			log.Printf("failed to write output file %v: ", p)
-			return err
+			return "", err
 		}
 	}
-	return nil
+	return outputFileName, nil
 }
 
 func parseFile(parser *syntax.Parser, filePath string) error {

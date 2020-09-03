@@ -5,10 +5,10 @@ import (
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/all"
 	"os"
 
-	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/dotnet"
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/csharp"
 	_go "github.com/pulumi/kube2pulumi/cmd/kube2pulumi/go"
-	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/nodejs"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/python"
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/typescript"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -24,8 +24,8 @@ func configureCLI() *cobra.Command {
 	// 4 commands for the distinct languages
 	rootCmd.AddCommand(python.Command())
 	rootCmd.AddCommand(_go.Command())
-	rootCmd.AddCommand(nodejs.Command())
-	rootCmd.AddCommand(dotnet.Command())
+	rootCmd.AddCommand(typescript.Command())
+	rootCmd.AddCommand(csharp.Command())
 	rootCmd.AddCommand(all.Command())
 
 	rootCmd.PersistentFlags().StringVarP(&manifestFile, "file", "f", "", "YAML file to convert")

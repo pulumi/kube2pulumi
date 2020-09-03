@@ -15,23 +15,6 @@ import (
 	"github.com/goccy/go-yaml/parser"
 )
 
-// Convert returns a string conversion of the input YAML
-// as a byte array into PCL: sample below
-// Output: resource foo "kubernetes:core/v1:Namespace" {
-// apiVersion = "v1"
-// kind = "Namespace"
-// metadata = {
-// name = "foo"
-// }
-// }
-func Convert(input []byte) (string, error) {
-	testFiles, err := parser.ParseBytes(input, parser.ParseComments)
-	if err != nil {
-		return "", err
-	}
-	return convert(*testFiles)
-}
-
 // ConvertFile returns a string conversion of the input YAML
 // in a file into PCL: sample below
 // Output: resource foo "kubernetes:core/v1:Namespace" {
@@ -49,6 +32,15 @@ func ConvertFile(filename string) (string, error) {
 	return convert(*testFiles)
 }
 
+// ConvertDirectory returns a string conversion of the input directory with
+// YAML manifests into PCL: sample below
+// Output: resource foo "kubernetes:core/v1:Namespace" {
+// apiVersion = "v1"
+// kind = "Namespace"
+// metadata = {
+// name = "foo"
+// }
+// }
 func ConvertDirectory(dirName string) (string, error) {
 	var buff bytes.Buffer
 	files, err := ioutil.ReadDir(dirName)
