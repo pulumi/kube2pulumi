@@ -25,11 +25,14 @@ import (
 // }
 // }
 func ConvertFile(filename string) (string, error) {
-	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
-	if err != nil {
-		return "", err
+	if strings.Contains(filename, ".yaml") || strings.Contains(filename, ".yml") {
+		testFiles, err := parser.ParseFile(filename, parser.ParseComments)
+		if err != nil {
+			return "", err
+		}
+		return convert(*testFiles)
 	}
-	return convert(*testFiles)
+	return "", fmt.Errorf("input was not a YAML file: %s", filename)
 }
 
 // ConvertDirectory returns a string conversion of the input directory with
