@@ -5,6 +5,7 @@ package yaml2pcl
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"io"
 	"io/ioutil"
@@ -75,18 +76,24 @@ func convert(testFiles ast.File) (string, error) {
 	var v Visitor
 	var buff bytes.Buffer
 	var err error
+	diags := hcl.Diagnostics{}
 
 	for _, doc := range testFiles.Docs {
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		header, err := getHeader(baseNodes)
-		if err != nil {
-			return "", err
+		header, diags := getHeader(baseNodes, diags)
+		// check diagnostics here and break at malformed resource then continue for other resources defined
+		if diags.HasErrors() {
+			for _, message := range diags.Errs() {
+				fmt.Println(message)
+			}
+			break
 		}
 		_, err = fmt.Fprint(&buff, header)
 		if err != nil {
 			return "", err
 		}
 		err = walkToPCL(v, doc.Body, &buff, "")
+		// check diagnostics here and break at malformed resource then continue for other resources defined
 		if err != nil {
 			return "", err
 		}
@@ -95,7 +102,7 @@ func convert(testFiles ast.File) (string, error) {
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node) (string, error) {
+func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics) {
 	var apiVersion string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -105,29 +112,37 @@ func getHeader(nodes []ast.Node) (string, error) {
 			}
 		}
 	}
+	// diagnostics message here and return
+	if apiVersion == "" {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: apiVersion not specified\n",
+			Detail:   "apiVersion field for the resource is not specified and is required",
+		})
+	}
 	if !strings.Contains(apiVersion, "/") {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
-	if apiVersion == "" {
-		return "", fmt.Errorf("malformed yaml: apiVersion not specified\n")
-	}
 
-	name := resourceName(nodes)
-	if name == "" {
-		return "", fmt.Errorf("malformed yaml: metadata/name not specified\n")
-	}
-
-	var kind string
-	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if mapValNode.Key.String() == "kind" {
-				kind = mapValNode.Value.String()
-				break
-			}
-		}
-	}
+	name, kind := resourceName(nodes)
+	// diagnostics message here and return
 	if kind == "" {
-		return "", fmt.Errorf("malformed yaml: resource kind not specified\n")
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: resource kind not specified\n",
+			Detail:   "kind field for the resource is not specified and is required",
+		})
+	}
+	// diagnostics message here and return
+	if name == kind {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: resource name not specified\n",
+			Detail:   "name field within the metadata for the resource is not specified and is required",
+		})
+	}
+	if diags.HasErrors() {
+		return "", diags
 	}
 
 	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
@@ -135,7 +150,7 @@ func getHeader(nodes []ast.Node) (string, error) {
 }
 
 // resourceName computes a name for the resource based on the namespace, name, and kind.
-func resourceName(nodes []ast.Node) string {
+func resourceName(nodes []ast.Node) (string, string) {
 	var kind, name, ns string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -170,10 +185,10 @@ func resourceName(nodes []ast.Node) string {
 
 	if len(ns) > 0 {
 		name = strings.ToUpper(string(name[0])) + name[1:]
-		return fmt.Sprintf("%s%s%s", ns, name, kind)
+		return fmt.Sprintf("%s%s%s", ns, name, kind), kind
 	}
 
-	return strings.ReplaceAll(fmt.Sprintf("%s%s", name, kind), ".", "_")
+	return strings.ReplaceAll(fmt.Sprintf("%s%s", name, kind), ".", "_"), kind
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
