@@ -93,7 +93,6 @@ func convert(testFiles ast.File) (string, error) {
 			return "", err
 		}
 		err = walkToPCL(v, doc.Body, &buff, "")
-		// check diagnostics here and break at malformed resource then continue for other resources defined
 		if err != nil {
 			return "", err
 		}
@@ -458,7 +457,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	default:
-		return fmt.Errorf("unexpected node type: " + n.Type().String())
+		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML used in order"+
+			"for this issue to get fixed: https://github.com/pulumi/kube2pulumi/issues", n.Type().String()))
 	}
 
 	return nil
