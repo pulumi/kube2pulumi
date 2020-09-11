@@ -140,8 +140,7 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "contains CRD",
 			Detail: "custom resource definitions cannot not be converted, please refer to \n" +
-				"https://github.com/pulumi/crd2pulumi in order to\n" +
-				"convert you're CRD",
+				"https://github.com/pulumi/crd2pulumi in order to convert your CRD",
 		})
 	}
 	// missing name
@@ -152,6 +151,7 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 			Detail:   "name field within the metadata for the resource is not specified and is required",
 		})
 	}
+
 	if diags.HasErrors() {
 		return "", diags
 	}
