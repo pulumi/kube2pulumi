@@ -196,3 +196,9 @@ func TestMultiLineString(t *testing.T) {
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "incorrectly parses multiline strings")
 }
+
+func TestCRD(t *testing.T) {
+	assertion := assert.New(t)
+	_, err := ConvertFile("../../testdata/customResourceDef.yaml")
+	assertion.NoError(err)
+}

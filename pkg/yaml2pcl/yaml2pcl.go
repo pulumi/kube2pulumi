@@ -83,9 +83,11 @@ func convert(testFiles ast.File) (string, error) {
 		header, diags := getHeader(baseNodes, diags)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
 		if diags.HasErrors() {
+			fmt.Println("\nDiagnostics: ")
 			for _, message := range diags.Errs() {
 				fmt.Println(message)
 			}
+			fmt.Println()
 			break
 		}
 		_, err = fmt.Fprint(&buff, header)
@@ -111,11 +113,11 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 			}
 		}
 	}
-	// diagnostics message here and return
+	// missing apiVersion
 	if apiVersion == "" {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
-			Summary:  "malformed yaml: apiVersion not specified\n",
+			Summary:  "malformed yaml: apiVersion not specified",
 			Detail:   "apiVersion field for the resource is not specified and is required",
 		})
 	}
@@ -124,19 +126,29 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 	}
 
 	name, kind := resourceName(nodes)
-	// diagnostics message here and return
+	// missing kind
 	if kind == "" {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
-			Summary:  "malformed yaml: resource kind not specified\n",
+			Summary:  "malformed yaml: resource kind not specified",
 			Detail:   "kind field for the resource is not specified and is required",
 		})
 	}
-	// diagnostics message here and return
+	// kind is a CRD and will break the program
+	if kind == "CustomResourceDefinition" {
+		diags = diags.Append(&hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "contains CRD",
+			Detail: "custom resource definitions cannot not be converted, please refer to \n" +
+				"https://github.com/pulumi/pulumi-kubernetes/blob/master/provider/cmd/crd2pulumi/README.md in order to\n" +
+				"convert you're CRD",
+		})
+	}
+	// missing name
 	if name == kind {
 		diags = diags.Append(&hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
-			Summary:  "malformed yaml: resource name not specified\n",
+			Summary:  "malformed yaml: resource name not specified",
 			Detail:   "name field within the metadata for the resource is not specified and is required",
 		})
 	}
