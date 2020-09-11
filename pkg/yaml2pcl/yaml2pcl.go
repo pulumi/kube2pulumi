@@ -469,8 +469,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	default:
-		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML used in order"+
-			"for this issue to get fixed: https://github.com/pulumi/kube2pulumi/issues", n.Type().String()))
+		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML input so we can take a look:"+
+			"https://github.com/pulumi/kube2pulumi/issues", n.Type().String()))
 	}
 
 	return nil
