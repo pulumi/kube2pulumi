@@ -140,7 +140,7 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "contains CRD",
 			Detail: "custom resource definitions cannot not be converted, please refer to \n" +
-				"https://github.com/pulumi/pulumi-kubernetes/blob/master/provider/cmd/crd2pulumi/README.md in order to\n" +
+				"https://github.com/pulumi/crd2pulumi in order to\n" +
 				"convert you're CRD",
 		})
 	}
