@@ -33,7 +33,7 @@ func ConvertFile(filename string) (string, error) {
 		}
 		return convert(*testFiles)
 	}
-	return "", fmt.Errorf("input was not a YAML file: %s", filename)
+	return "", fmt.Errorf("input file does not have an expected extension: %s", filename)
 }
 
 // ConvertDirectory returns a string conversion of the input directory with
@@ -469,8 +469,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	default:
-		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML input so we can take a look:"+
-			"https://github.com/pulumi/kube2pulumi/issues", n.Type().String()))
+		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML input so we"+
+			"can take a look: https://github.com/pulumi/kube2pulumi/issues/new", n.Type().String()))
 	}
 
 	return nil
