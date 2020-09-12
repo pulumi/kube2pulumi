@@ -199,3 +199,9 @@ func TestCRD(t *testing.T) {
 	_, err := ConvertFile(filepath.Join("..", "..", "testdata", "customResourceDef.yaml"))
 	assertion.NoError(err)
 }
+
+func TestNotYaml(t *testing.T) {
+	assertion := assert.New(t)
+	_, err := ConvertFile(filepath.Join("..", "..", "testdata", "empty", "notYAML.txt"))
+	assertion.Error(err)
+}
