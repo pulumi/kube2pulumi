@@ -45,7 +45,7 @@ func TestDoubleQuotes(t *testing.T) {
 	langs := getLangs()
 
 	for language := range langs {
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes"), language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes.yaml"), language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -58,7 +58,7 @@ func TestSpecialChar(t *testing.T) {
 	langs := getLangs()
 
 	for language := range langs {
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar"), language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar.yaml"), language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -71,7 +71,7 @@ func TestAnnotations(t *testing.T) {
 	langs := getLangs()
 
 	for language := range langs {
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep"), language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep.yaml"), language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -85,10 +85,10 @@ func TestMultiLineString(t *testing.T) {
 
 	for language, ext := range langs {
 		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
-			fmt.Sprintf("expectedMultilineString%s", ext)))
+			fmt.Sprintf("MultilineString%s", ext)))
 		assertion.NoError(err)
 
-		path, diags, err := Kube2PulumiDirectory(filepath.Join("..", "..", "testdata", "MultilineString"), language)
+		path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "MultilineString.yaml"), language)
 		assertion.NoError(err)
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
