@@ -40,7 +40,7 @@ func configureCLI() *cobra.Command {
 func main() {
 	rootCmd := configureCLI()
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Printf("unable to run program %v\n", err)
+		fmt.Printf("unable to run program: %v\n", err)
 		os.Exit(1)
 	}
 }

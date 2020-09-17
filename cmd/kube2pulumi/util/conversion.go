@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/pulumi/kube2pulumi/pkg/kube2pulumi"
 	"os"
 )
@@ -19,17 +20,25 @@ func RunConversion(dirPath string, filePath string, language string) (string, er
 	}
 	var outPath string
 	var err error
+	diags := hcl.Diagnostics{}
 	// filepath only
 	if filePath != "" {
-		outPath, err = kube2pulumi.Kube2PulumiFile(filePath, language)
+		outPath, diags, err = kube2pulumi.Kube2PulumiFile(filePath, language)
 		if err != nil {
 			return "", err
 		}
 	} else { // dir only
-		outPath, err = kube2pulumi.Kube2PulumiDirectory(dirPath, language)
+		outPath, diags, err = kube2pulumi.Kube2PulumiDirectory(dirPath, language)
 		if err != nil {
 			return "", err
 		}
 	}
+
+	fmt.Println("\nDiagnostics: ")
+	for _, message := range diags.Errs() {
+		fmt.Println(message)
+	}
+	fmt.Println()
+
 	return outPath, nil
 }

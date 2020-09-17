@@ -19,7 +19,10 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../../testdata/Namespace.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Single resource conversion was incorrect")
 }
@@ -36,7 +39,10 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../../testdata/NamespaceWithComments.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "NamespaceWithComments.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
@@ -67,7 +73,10 @@ cpu = 0.2
 }
 }
 `
-	result, err := ConvertFile("../../testdata/OnePodArray.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "OnePodArray.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Nested array is converted incorrectly")
 }
@@ -75,11 +84,14 @@ cpu = 0.2
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "Role.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "Role.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile(filepath.Join("../..", "testdata", "Role.yaml"))
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "Role.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Role is converted incorrectly")
 }
@@ -87,11 +99,14 @@ func TestRole(t *testing.T) {
 func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "expK8sOperator.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertDirectory("../../testdata/k8sOperator/")
+	result, diags, err := ConvertDirectory(filepath.Join("..", "..", "testdata", "k8sOperator/"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Directory is converted incorrectly")
 }
@@ -108,7 +123,10 @@ name = "foo"
 }
 }
 `
-	result, err := ConvertFile("../../testdata/NamespaceWithTrailingComment.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "NamespaceWithTrailingComment.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "Comments are converted incorrectly")
 }
@@ -116,33 +134,42 @@ name = "foo"
 func TestIncorrectPath(t *testing.T) {
 	assertion := assert.New(t)
 	fakePath := "fakePath"
-	_, err := ConvertFile(fakePath)
+	_, _, err := ConvertFile(fakePath)
 	assertion.Error(err)
-	_, err = ConvertDirectory(fakePath)
+	_, _, err = ConvertDirectory(fakePath)
 	assertion.Error(err)
 }
 
 func TestMalformedHeaderYaml(t *testing.T) {
 	assertion := assert.New(t)
-	_, err := ConvertFile("../../testdata/MalformedYaml.yaml")
-	assertion.Error(err)
+	_, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MalformedYaml.yaml"))
+	if diags != nil {
+		assertion.True(diags.HasErrors(), "diagnostics incorrectly displayed for wrongly formatted yaml")
+	}
+	assertion.NoError(err)
 }
 
 func TestMultipleResourceGen(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "MultipleResources.pcl"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "MultipleResources.pcl"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile("../../testdata/MultipleResources.yml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MultipleResources.yml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "File with multiple resources is converted incorrectly")
 }
 
 func TestEmptyDir(t *testing.T) {
 	assertion := assert.New(t)
-	_, err := ConvertDirectory("../../testdata/empty/")
+	_, diags, err := ConvertDirectory(filepath.Join("..", "..", "testdata", "empty/"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.Error(err)
 	assertion.Contains(err.Error(), "unable to find any YAML files")
 }
@@ -150,22 +177,28 @@ func TestEmptyDir(t *testing.T) {
 func TestAnnotationsDeployment(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "testDep.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile("../../testdata/testDep.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "testDep.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.Equal(expected, result, "pcl is incorrect")
 }
 
 func TestNoDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "doubleQuotes.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile("../../testdata/doubleQuotes.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "doubleQuotes.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "double quotes inserted")
 }
@@ -173,11 +206,14 @@ func TestNoDoubleQuotes(t *testing.T) {
 func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "specialChar.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile("../../testdata/specialChar.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "specialChar.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "double quotes inserted")
 }
@@ -185,11 +221,29 @@ func TestSpecialChar(t *testing.T) {
 func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("../..", "testdata", "MultilineString.pp"))
+	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, err := ConvertFile("../../testdata/MultilineString.yaml")
+	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MultilineString.yaml"))
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 	assertion.Equal(expected, result, "incorrectly parses multiline strings")
+}
+
+func TestCRD(t *testing.T) {
+	assertion := assert.New(t)
+	_, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "customResourceDef.yaml"))
+	if diags != nil {
+		assertion.True(diags.HasErrors(), "diagnostics not detecting CRD")
+	}
+	assertion.NoError(err)
+}
+
+func TestNotYaml(t *testing.T) {
+	assertion := assert.New(t)
+	_, _, err := ConvertFile(filepath.Join("..", "..", "testdata", "empty", "notYAML.txt"))
+	assertion.Error(err)
 }

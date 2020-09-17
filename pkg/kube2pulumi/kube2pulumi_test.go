@@ -1,11 +1,103 @@
 package kube2pulumi
 
 import (
+	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func getLangs() map[string]string {
+	return map[string]string{
+		"python":     ".py",
+		"typescript": ".ts",
+		"csharp":     ".cs",
+		"go":         ".go",
+	}
+}
+
+// GENERAL TESTS
+
+func TestOperator(t *testing.T) {
+	assertion := assert.New(t)
+	langs := getLangs()
+
+	for language, ext := range langs {
+		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
+		assertion.NoError(err)
+
+		path, diags, err := Kube2PulumiDirectory(filepath.Join("..", "..", "testdata", "k8sOperator"), language)
+		assertion.NoError(err)
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+
+		generated, err := ioutil.ReadFile(path)
+		assertion.NoError(err)
+
+		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+	}
+}
+
+func TestDoubleQuotes(t *testing.T) {
+	assertion := assert.New(t)
+	langs := getLangs()
+
+	for language := range langs {
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes.yaml"), language)
+		if diags != nil {
+			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+		}
+		assertion.NoError(err)
+	}
+}
+
+func TestSpecialChar(t *testing.T) {
+	assertion := assert.New(t)
+	langs := getLangs()
+
+	for language := range langs {
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar.yaml"), language)
+		if diags != nil {
+			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+		}
+		assertion.NoError(err)
+	}
+}
+
+func TestAnnotations(t *testing.T) {
+	assertion := assert.New(t)
+	langs := getLangs()
+
+	for language := range langs {
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep.yaml"), language)
+		if diags != nil {
+			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+		}
+		assertion.NoError(err)
+	}
+}
+
+func TestMultiLineString(t *testing.T) {
+	assertion := assert.New(t)
+	langs := getLangs()
+
+	for language, ext := range langs {
+		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+			fmt.Sprintf("MultilineString%s", ext)))
+		assertion.NoError(err)
+
+		path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "MultilineString.yaml"), language)
+		assertion.NoError(err)
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+
+		generated, err := ioutil.ReadFile(path)
+		assertion.NoError(err)
+
+		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+	}
+}
 
 // PYTHON CODEGEN TESTS
 
@@ -22,64 +114,16 @@ foo_namespace = kubernetes.core.v1.Namespace("fooNamespace",
         "name": "foo",
     })
 `
-	path, err := Kube2PulumiFile("../../testdata/Namespace.yaml", "python")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "python")
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 
 	py, err := ioutil.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
-}
-
-func TestOperatorPy(t *testing.T) {
-	assertion := assert.New(t)
-
-	pyExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.py")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiDirectory("../../testdata/k8sOperator/", "python")
-	assertion.NoError(err)
-
-	py, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(pyExpected), string(py), "python operator codegen is incorrect")
-}
-
-func TestDoubleQuotesPy(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/doubleQuotes.yaml", "python")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharPy(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/specialChar.yaml", "python")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsPy(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/testDep.yaml", "python")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringPy(t *testing.T) {
-	assertion := assert.New(t)
-
-	pyExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.py")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiFile("../../testdata/MultilineString.yaml", "python")
-	assertion.NoError(err)
-
-	py, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(pyExpected), string(py), "multiline gen is incorrect")
 }
 
 // TYPESCRIPT CODEGEN TESTS
@@ -98,64 +142,16 @@ const fooNamespace = new kubernetes.core.v1.Namespace("fooNamespace", {
     },
 });
 `
-	path, err := Kube2PulumiFile("../../testdata/Namespace.yaml", "typescript")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "typescript")
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 
 	ts, err := ioutil.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
-}
-
-func TestOperatorTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	tsExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.ts")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiDirectory("../../testdata/k8sOperator/", "typescript")
-	assertion.NoError(err)
-
-	ts, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(tsExpected), string(ts), "typescript operator codegen is incorrect")
-}
-
-func TestDoubleQuotesTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/doubleQuotes.yaml", "typescript")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/specialChar.yaml", "typescript")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/testDep.yaml", "typescript")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringTs(t *testing.T) {
-	assertion := assert.New(t)
-
-	tsExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.ts")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiFile("../../testdata/MultilineString.yaml", "typescript")
-	assertion.NoError(err)
-
-	ts, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(tsExpected), string(ts), "multiline gen is incorrect")
 }
 
 // C# CODEGEN TESTS
@@ -183,64 +179,16 @@ class MyStack : Stack
 
 }
 `
-	path, err := Kube2PulumiFile("../../testdata/Namespace.yaml", "csharp")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "csharp")
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 
 	cs, err := ioutil.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
-}
-
-func TestOperatorCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	csExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.cs")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiDirectory("../../testdata/k8sOperator", "csharp")
-	assertion.NoError(err)
-
-	cs, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(csExpected), string(cs), "csharp operator codegen is incorrect")
-}
-
-func TestDoubleQuotesCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/doubleQuotes.yaml", "csharp")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/specialChar.yaml", "csharp")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/testDep.yaml", "csharp")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringCs(t *testing.T) {
-	assertion := assert.New(t)
-
-	csExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.cs")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiFile("../../testdata/MultilineString.yaml", "csharp")
-	assertion.NoError(err)
-
-	cs, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(csExpected), string(cs), "multiline gen is incorrect")
 }
 
 // GOLANG CODEGEN TESTS
@@ -272,62 +220,14 @@ func main() {
 	})
 }
 `
-	path, err := Kube2PulumiFile("../../testdata/Namespace.yaml", "go")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "go")
+	if diags != nil {
+		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+	}
 	assertion.NoError(err)
 
 	_go, err := ioutil.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
-}
-
-func TestOperatorGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	goExpected, err := ioutil.ReadFile("../../testdata/k8sOperator/expectedMain.go")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiDirectory("../../testdata/k8sOperator/", "go")
-	assertion.NoError(err)
-
-	_go, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(goExpected), string(_go), "golang operator codegen is incorrect")
-}
-
-func TestDoubleQuotesGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/doubleQuotes.yaml", "go")
-	assertion.NoError(err)
-}
-
-func TestSpecialCharGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/specialChar.yaml", "go")
-	assertion.NoError(err)
-}
-
-func TestAnnotationsGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	_, err := Kube2PulumiFile("../../testdata/testDep.yaml", "go")
-	assertion.NoError(err)
-}
-
-func TestMultiLineStringGo(t *testing.T) {
-	assertion := assert.New(t)
-
-	goExpected, err := ioutil.ReadFile("../../testdata/expectedMultilineString.go")
-	assertion.NoError(err)
-
-	path, err := Kube2PulumiFile("../../testdata/MultilineString.yaml", "go")
-	assertion.NoError(err)
-
-	_go, err := ioutil.ReadFile(path)
-	assertion.NoError(err)
-
-	assertion.Equal(string(goExpected), string(_go), "multiline gen is incorrect")
 }

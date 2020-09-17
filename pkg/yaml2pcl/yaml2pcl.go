@@ -5,6 +5,7 @@ package yaml2pcl
 import (
 	"bytes"
 	"fmt"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"io"
 	"io/ioutil"
@@ -24,10 +25,10 @@ import (
 // name = "foo"
 // }
 // }
-func ConvertFile(filename string) (string, error) {
+func ConvertFile(filename string) (string, hcl.Diagnostics, error) {
 	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
 	if err != nil {
-		return "", err
+		return "", hcl.Diagnostics{}, fmt.Errorf("failed to parse: input file does not contain valid yaml: %s", filename)
 	}
 	return convert(*testFiles)
 }
@@ -41,58 +42,65 @@ func ConvertFile(filename string) (string, error) {
 // name = "foo"
 // }
 // }
-func ConvertDirectory(dirName string) (string, error) {
+func ConvertDirectory(dirName string) (string, hcl.Diagnostics, error) {
 	var buff bytes.Buffer
+	diagnostics := hcl.Diagnostics{}
+
 	files, err := ioutil.ReadDir(dirName)
 	if err != nil {
-		return "", err
+		return "", diagnostics, err
 	}
 
 	yamlFiles := 0
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".yaml") || strings.Contains(file.Name(), ".yml") {
 			yamlFiles++
-			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
+			pcl, diags, err := ConvertFile(filepath.Join(dirName, file.Name()))
+			// append all diags from file into new diagnostics object
+			diagnostics = diagnostics.Extend(diags)
 			if err != nil {
-				return "", err
+				return "", diagnostics, err
 			}
 			_, err = fmt.Fprintf(&buff, "%s\n", pcl)
 			if err != nil {
-				return "", err
+				return "", diagnostics, err
 			}
 		}
 	}
 	if yamlFiles == 0 {
-		return "", fmt.Errorf("unable to find any YAML files in directory: %s", dirName)
+		return "", diagnostics, fmt.Errorf("unable to find any YAML files in directory: %s", dirName)
 	}
-	return buff.String(), nil
+	return buff.String(), diagnostics, err
 }
 
-func convert(testFiles ast.File) (string, error) {
+func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 	var v Visitor
 	var buff bytes.Buffer
 	var err error
+	diagnostics := hcl.Diagnostics{}
 
 	for _, doc := range testFiles.Docs {
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		header, err := getHeader(baseNodes)
-		if err != nil {
-			return "", err
+		header, diag := getHeader(baseNodes)
+		// check diagnostics here and break at malformed resource then continue for other resources defined
+		if diag.Severity == hcl.DiagnosticSeverity(1) {
+			diagnostics = diagnostics.Append(&diag)
+			break
 		}
 		_, err = fmt.Fprint(&buff, header)
 		if err != nil {
-			return "", err
+			return "", diagnostics, err
 		}
 		err = walkToPCL(v, doc.Body, &buff, "")
 		if err != nil {
-			return "", err
+			return "", diagnostics, err
 		}
 	}
-	return buff.String(), err
+	return buff.String(), diagnostics, err
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node) (string, error) {
+func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	var apiVersion string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -102,37 +110,51 @@ func getHeader(nodes []ast.Node) (string, error) {
 			}
 		}
 	}
+	// missing apiVersion
+	if apiVersion == "" {
+		return "", hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: apiVersion not specified",
+			Detail:   "apiVersion field for the resource is not specified and is required",
+		}
+	}
 	if !strings.Contains(apiVersion, "/") {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
 	}
-	if apiVersion == "" {
-		return "", fmt.Errorf("malformed yaml: apiVersion not specified\n")
-	}
 
-	name := resourceName(nodes)
-	if name == "" {
-		return "", fmt.Errorf("malformed yaml: metadata/name not specified\n")
-	}
-
-	var kind string
-	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if mapValNode.Key.String() == "kind" {
-				kind = mapValNode.Value.String()
-				break
-			}
+	name, kind := resourceName(nodes)
+	// missing kind
+	if kind == "" {
+		return "", hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: resource kind not specified",
+			Detail:   "kind field for the resource is not specified and is required",
 		}
 	}
-	if kind == "" {
-		return "", fmt.Errorf("malformed yaml: resource kind not specified\n")
+	// kind is a CRD and will break the program
+	if kind == "CustomResourceDefinition" {
+		return "", hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "contains CRD",
+			Detail: "custom resource definitions cannot not be converted, please refer to \n" +
+				"https://github.com/pulumi/crd2pulumi in order to convert your CRD",
+		}
+	}
+	// missing name
+	if name == kind {
+		return "", hcl.Diagnostic{
+			Severity: hcl.DiagnosticSeverity(1),
+			Summary:  "malformed yaml: resource name not specified",
+			Detail:   "name field within the metadata for the resource is not specified and is required",
+		}
 	}
 
 	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
-	return header, nil
+	return header, hcl.Diagnostic{}
 }
 
 // resourceName computes a name for the resource based on the namespace, name, and kind.
-func resourceName(nodes []ast.Node) string {
+func resourceName(nodes []ast.Node) (string, string) {
 	var kind, name, ns string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -167,10 +189,10 @@ func resourceName(nodes []ast.Node) string {
 
 	if len(ns) > 0 {
 		name = strings.ToUpper(string(name[0])) + name[1:]
-		return fmt.Sprintf("%s%s%s", ns, name, kind)
+		return fmt.Sprintf("%s%s%s", ns, name, kind), kind
 	}
 
-	return strings.ReplaceAll(fmt.Sprintf("%s%s", name, kind), ".", "_")
+	return strings.ReplaceAll(fmt.Sprintf("%s%s", name, kind), ".", "_"), kind
 }
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
@@ -440,7 +462,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 	default:
-		return fmt.Errorf("unexpected node type: " + n.Type().String())
+		return fmt.Errorf(fmt.Sprintf("unexpected node type: %s\n Please file an issue with the YAML input so we"+
+			"can take a look: https://github.com/pulumi/kube2pulumi/issues/new", n.Type().String()))
 	}
 
 	return nil
