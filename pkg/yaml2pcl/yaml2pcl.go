@@ -25,10 +25,10 @@ import (
 // name = "foo"
 // }
 // }
-func ConvertFile(filename string) (string, error) {
+func ConvertFile(filename string) (string, hcl.Diagnostics, error) {
 	testFiles, err := parser.ParseFile(filename, parser.ParseComments)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse: input file does not contain valid yaml: %s", filename)
+		return "", hcl.Diagnostics{}, fmt.Errorf("failed to parse: input file does not contain valid yaml: %s", filename)
 	}
 	return convert(*testFiles)
 }
@@ -42,65 +42,65 @@ func ConvertFile(filename string) (string, error) {
 // name = "foo"
 // }
 // }
-func ConvertDirectory(dirName string) (string, error) {
+func ConvertDirectory(dirName string) (string, hcl.Diagnostics, error) {
 	var buff bytes.Buffer
+	diagnostics := hcl.Diagnostics{}
+
 	files, err := ioutil.ReadDir(dirName)
 	if err != nil {
-		return "", err
+		return "", diagnostics, err
 	}
 
 	yamlFiles := 0
 	for _, file := range files {
 		if strings.Contains(file.Name(), ".yaml") || strings.Contains(file.Name(), ".yml") {
 			yamlFiles++
-			pcl, err := ConvertFile(filepath.Join(dirName, file.Name()))
+			pcl, diags, err := ConvertFile(filepath.Join(dirName, file.Name()))
+			// append all diags from file into new diagnostics object
+			diagnostics = diagnostics.Extend(diags)
 			if err != nil {
-				return "", err
+				return "", diagnostics, err
 			}
 			_, err = fmt.Fprintf(&buff, "%s\n", pcl)
 			if err != nil {
-				return "", err
+				return "", diagnostics, err
 			}
 		}
 	}
 	if yamlFiles == 0 {
-		return "", fmt.Errorf("unable to find any YAML files in directory: %s", dirName)
+		return "", diagnostics, fmt.Errorf("unable to find any YAML files in directory: %s", dirName)
 	}
-	return buff.String(), nil
+	return buff.String(), diagnostics, err
 }
 
-func convert(testFiles ast.File) (string, error) {
+func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 	var v Visitor
 	var buff bytes.Buffer
 	var err error
-	diags := hcl.Diagnostics{}
+	diagnostics := hcl.Diagnostics{}
 
 	for _, doc := range testFiles.Docs {
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		header, diags := getHeader(baseNodes, diags)
+		header, diag := getHeader(baseNodes)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
-		if diags.HasErrors() {
-			fmt.Println("\nDiagnostics: ")
-			for _, message := range diags.Errs() {
-				fmt.Println(message)
-			}
-			fmt.Println()
+		if diag.Severity == hcl.DiagnosticSeverity(1) {
+			diagnostics = diagnostics.Append(&diag)
 			break
 		}
 		_, err = fmt.Fprint(&buff, header)
 		if err != nil {
-			return "", err
+			return "", diagnostics, err
 		}
 		err = walkToPCL(v, doc.Body, &buff, "")
 		if err != nil {
-			return "", err
+			return "", diagnostics, err
 		}
 	}
-	return buff.String(), err
+	return buff.String(), diagnostics, err
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics) {
+func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	var apiVersion string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
@@ -112,11 +112,11 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 	}
 	// missing apiVersion
 	if apiVersion == "" {
-		diags = diags.Append(&hcl.Diagnostic{
+		return "", hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "malformed yaml: apiVersion not specified",
 			Detail:   "apiVersion field for the resource is not specified and is required",
-		})
+		}
 	}
 	if !strings.Contains(apiVersion, "/") {
 		apiVersion = fmt.Sprintf("core/%s", apiVersion)
@@ -125,36 +125,32 @@ func getHeader(nodes []ast.Node, diags hcl.Diagnostics) (string, hcl.Diagnostics
 	name, kind := resourceName(nodes)
 	// missing kind
 	if kind == "" {
-		diags = diags.Append(&hcl.Diagnostic{
+		return "", hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "malformed yaml: resource kind not specified",
 			Detail:   "kind field for the resource is not specified and is required",
-		})
+		}
 	}
 	// kind is a CRD and will break the program
 	if kind == "CustomResourceDefinition" {
-		diags = diags.Append(&hcl.Diagnostic{
+		return "", hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "contains CRD",
 			Detail: "custom resource definitions cannot not be converted, please refer to \n" +
 				"https://github.com/pulumi/crd2pulumi in order to convert your CRD",
-		})
+		}
 	}
 	// missing name
 	if name == kind {
-		diags = diags.Append(&hcl.Diagnostic{
+		return "", hcl.Diagnostic{
 			Severity: hcl.DiagnosticSeverity(1),
 			Summary:  "malformed yaml: resource name not specified",
 			Detail:   "name field within the metadata for the resource is not specified and is required",
-		})
-	}
-
-	if diags.HasErrors() {
-		return "", diags
+		}
 	}
 
 	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
-	return header, nil
+	return header, hcl.Diagnostic{}
 }
 
 // resourceName computes a name for the resource based on the namespace, name, and kind.
