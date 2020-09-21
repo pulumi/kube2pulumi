@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/all"
 	"os"
 
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/all"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/csharp"
 	_go "github.com/pulumi/kube2pulumi/cmd/kube2pulumi/go"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/python"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/typescript"
+	"github.com/pulumi/kube2pulumi/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -33,6 +34,15 @@ func configureCLI() *cobra.Command {
 
 	rootCmd.PersistentFlags().StringVarP(&directoryPath, "directory", "d", "", "file path for directory to convert")
 	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))
+
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of kube2pulumi",
+		Long:  `All software has versions. This is kube2pulumi's.`,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println(version.Version)
+		},
+	})
 
 	return rootCmd
 }
