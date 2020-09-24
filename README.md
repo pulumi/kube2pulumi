@@ -28,13 +28,14 @@ kube2pulumi uses [Go modules](https://github.com/golang/go/wiki/Modules) to mana
 Once this prerequisite is installed, run the following to build the `kube2pulumi` binary and install it into `$GOPATH/bin`:
 
 ```console
-$ go build -o $GOPATH/bin/kube2pulumi cmd/kube2pulumi/main.go
+$ go build -o $GOPATH/bin/kube2pulumi -ldflags="-X github.com/pulumi/kube2pulumi/pkg/version.Version=1.0.0" cmd/kube2pulumi/main.go
 ```
 
-Go should automatically handle pulling the dependencies for you.
+The `ldflags` argument is necessary to dynamically set the `kube2pulumi` version at build time. However, the version 
+itself can be anything, so you don't have to set it to `dev`.
 
-If `$GOPATH/bin` is not on your path, you may want to move the `kube2pulumi` binary from `$GOPATH/bin`
-into a directory that is on your path.
+Go should automatically handle pulling the dependencies for you. If `$GOPATH/bin` is not on your path, you may want to 
+move the `kube2pulumi` binary from `$GOPATH/bin` into a directory that is on your path.
 
 ## Usage
 

@@ -9,6 +9,8 @@ builds:
     - amd64
   binary: kube2pulumi
   main: ./cmd/kube2pulumi/main.go
+  ldflags:
+    - -X github.com/pulumi/kube2pulumi/pkg/version.Version={{.Tag}}
 archives:
   - name_template: "{{ .Binary }}-{{ .Tag }}-{{ .Os }}-{{ .Arch }}"
     format_overrides:
