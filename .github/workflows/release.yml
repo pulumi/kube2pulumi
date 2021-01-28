@@ -4,7 +4,7 @@ on:
     tags: [ "v*.[0-99]" ] # only a valid semver tag
 
 env:
-    GITHUB_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   goreleaser:
