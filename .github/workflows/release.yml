@@ -32,4 +32,4 @@ jobs:
       - name: Chocolatey Package Deployment
         run: |
           CURRENT_TAG=v$(pulumictl get version --language generic -o)
-          pulumictl create choco-deploy -a kube2pulumi v${CURRENT_TAG}
+          pulumictl create choco-deploy -a kube2pulumi ${CURRENT_TAG}
