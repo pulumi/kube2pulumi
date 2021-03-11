@@ -4,8 +4,8 @@ import pulumi_kubernetes as kubernetes
 argocd_server_deployment = kubernetes.apps.v1.Deployment("argocd_serverDeployment",
     api_version="apps/v1",
     kind="Deployment",
-    metadata={
-        "labels": {
+    metadata=kubernetes.meta.v1.ObjectMetaArgs(
+        labels={
             "app.kubernetes.io/component": "server",
             "aws:region": "us-west-2",
             "key%percent": "percent",
@@ -21,5 +21,5 @@ argocd_server_deployment = kubernetes.apps.v1.Deployment("argocd_serverDeploymen
             "key=>geq": "geq",
             "key==eq": "equal",
         },
-        "name": "argocd-server",
-    })
+        name="argocd-server",
+    ))
