@@ -4,10 +4,10 @@ import pulumi_kubernetes as kubernetes
 kube_system_coredns_config_map = kubernetes.core.v1.ConfigMap("kube_systemCorednsConfigMap",
     api_version="v1",
     kind="ConfigMap",
-    metadata={
-        "name": "coredns",
-        "namespace": "kube-system",
-    },
+    metadata=kubernetes.meta.v1.ObjectMetaArgs(
+        name="coredns",
+        namespace="kube-system",
+    ),
     data={
         "Corefile": """.:53 {
         errors
