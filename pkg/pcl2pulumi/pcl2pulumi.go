@@ -12,12 +12,12 @@ import (
 	"strings"
 
 	"github.com/hashicorp/hcl/v2"
-	csgen "github.com/pulumi/pulumi/pkg/v2/codegen/dotnet"
-	gogen "github.com/pulumi/pulumi/pkg/v2/codegen/go"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2"
-	"github.com/pulumi/pulumi/pkg/v2/codegen/hcl2/syntax"
-	tsgen "github.com/pulumi/pulumi/pkg/v2/codegen/nodejs"
-	pygen "github.com/pulumi/pulumi/pkg/v2/codegen/python"
+	csgen "github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
+	gogen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/hcl2"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/hcl2/syntax"
+	tsgen "github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
+	pygen "github.com/pulumi/pulumi/pkg/v3/codegen/python"
 )
 
 // generates pulumi program for specified language type given the input stream (pcl)
