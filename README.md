@@ -9,7 +9,7 @@ Check out the [kube2pulumi web app](https://www.pulumi.com/kube2pulumi/) to see 
 1. [Pulumi CLI](https://pulumi.io/quickstart/install.html)
 2. Install the Pulumi Kubernetes plugin:
 ```console
-$ pulumi plugin install resource kubernetes v2.4.2
+$ pulumi plugin install resource kubernetes v3.0.0
 ```
 
 ## Building and Installation
@@ -117,9 +117,9 @@ kube2pulumi go -f ./pod.yaml
 package main
 
 import (
-	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/core/v1"
-	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
-	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
+	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 
 func main() {

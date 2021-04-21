@@ -16,6 +16,6 @@ jobs:
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
       - name: Install kubernetes plugin
-        run: pulumi plugin install resource kubernetes 2.4.2
+        run: pulumi plugin install resource kubernetes 3.0.0
       - name: Run tests
         run: go test ./...
