@@ -34,3 +34,7 @@ brews:
       email: bot@pulumi.com
     homepage: "https://pulumi.io"
     description: "Convert Kubernetes manifests to Pulumi code"
+    folder: Formula
+    license: Apache-2.0
+    test: |
+      system "#{bin}/kube2pulumi version"
