@@ -7,6 +7,7 @@ builds:
     - darwin
   goarch:
     - amd64
+    - arm64
   binary: kube2pulumi
   main: ./cmd/kube2pulumi/main.go
   ldflags:
