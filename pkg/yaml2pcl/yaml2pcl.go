@@ -149,7 +149,7 @@ func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 		}
 	}
 
-	header := fmt.Sprintf(`resource %s "kubernetes:%s:%s" `, name, apiVersion, kind)
+	header := fmt.Sprintf(`resource "%s" "kubernetes:%s:%s" `, name, apiVersion, kind)
 	return header, hcl.Diagnostic{}
 }
 
