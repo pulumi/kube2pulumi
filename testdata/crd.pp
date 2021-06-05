@@ -1,4 +1,4 @@
-resource crontabs_stable_example_comCustomResourceDefinition "kubernetes:apiextensions.k8s.io/v1:CustomResourceDefinition" {
+resource "crontabs_stable_example_comCustomResourceDefinition" "kubernetes:apiextensions.k8s.io/v1:CustomResourceDefinition" {
 apiVersion = "apiextensions.k8s.io/v1"
 kind = "CustomResourceDefinition"
 metadata = {
