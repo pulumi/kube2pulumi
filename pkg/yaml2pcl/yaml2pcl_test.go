@@ -11,7 +11,7 @@ import (
 func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
+	expected := `resource "fooNamespace" "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 metadata = {
@@ -30,7 +30,7 @@ name = "foo"
 func TestNamespaceComments(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
+	expected := `resource "fooNamespace" "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 kind = "Namespace"
 # this is a codegentest comment
@@ -50,7 +50,7 @@ name = "foo"
 func Test1PodArray(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource fooBarPod "kubernetes:core/v1:Pod" {
+	expected := `resource "fooBarPod" "kubernetes:core/v1:Pod" {
 apiVersion = "v1"
 kind = "Pod"
 metadata = {
@@ -114,7 +114,7 @@ func TestDirk8sOperator(t *testing.T) {
 func TestNamespaceTrailingComments(t *testing.T) {
 	assertion := assert.New(t)
 
-	expected := `resource fooNamespace "kubernetes:core/v1:Namespace" {
+	expected := `resource "fooNamespace" "kubernetes:core/v1:Namespace" {
 apiVersion = "v1"
 # this is a trailing comment
 kind = "Namespace"

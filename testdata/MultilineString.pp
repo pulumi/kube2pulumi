@@ -1,4 +1,4 @@
-resource kube_systemCorednsConfigMap "kubernetes:core/v1:ConfigMap" {
+resource "kube_systemCorednsConfigMap" "kubernetes:core/v1:ConfigMap" {
 apiVersion = "v1"
 kind = "ConfigMap"
 metadata = {

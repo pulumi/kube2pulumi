@@ -1,4 +1,4 @@
-resource testRole "kubernetes:rbac.authorization.k8s.io/v1:Role" {
+resource "testRole" "kubernetes:rbac.authorization.k8s.io/v1:Role" {
 apiVersion = "rbac.authorization.k8s.io/v1"
 kind = "Role"
 metadata = {

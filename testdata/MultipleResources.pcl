@@ -1,4 +1,4 @@
-resource my_nginx_svcService "kubernetes:core/v1:Service" {
+resource "my_nginx_svcService" "kubernetes:core/v1:Service" {
 apiVersion = "v1"
 kind = "Service"
 metadata = {
@@ -19,7 +19,7 @@ app = "nginx"
 }
 }
 }
-resource my_nginxDeployment "kubernetes:apps/v1:Deployment" {
+resource "my_nginxDeployment" "kubernetes:apps/v1:Deployment" {
 apiVersion = "apps/v1"
 kind = "Deployment"
 metadata = {
