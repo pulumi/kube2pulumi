@@ -14,26 +14,27 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("file")
+			outputFile := viper.GetString("outputFile")
 
-			python, err := util.RunConversion(dirPath, filePath, "python")
+			python, err := util.RunConversion(dirPath, filePath, outputFile, "python")
 			if err != nil {
 				return err
 			}
 			fmt.Printf("Conversion successful! Generated File: %s\n", python)
 
-			typescript, err := util.RunConversion(dirPath, filePath, "typescript")
+			typescript, err := util.RunConversion(dirPath, filePath, outputFile, "typescript")
 			if err != nil {
 				return err
 			}
 			fmt.Printf("Conversion successful! Generated File: %s\n", typescript)
 
-			csharp, err := util.RunConversion(dirPath, filePath, "csharp")
+			csharp, err := util.RunConversion(dirPath, filePath, outputFile, "csharp")
 			if err != nil {
 				return err
 			}
 			fmt.Printf("Conversion successful! Generated File: %s\n", csharp)
 
-			golang, err := util.RunConversion(dirPath, filePath, "go")
+			golang, err := util.RunConversion(dirPath, filePath, outputFile, "go")
 			if err != nil {
 				return err
 			}

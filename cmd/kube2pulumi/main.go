@@ -17,6 +17,7 @@ import (
 var (
 	manifestFile  string
 	directoryPath string
+	outputFile    string
 )
 
 func configureCLI() *cobra.Command {
@@ -31,6 +32,9 @@ func configureCLI() *cobra.Command {
 
 	rootCmd.PersistentFlags().StringVarP(&manifestFile, "file", "f", "", "YAML file to convert")
 	viper.BindPFlag("file", rootCmd.PersistentFlags().Lookup("file"))
+
+	rootCmd.PersistentFlags().StringVarP(&outputFile, "outputFile", "o", "", "The name of the output file to write to")
+	viper.BindPFlag("outputFile", rootCmd.PersistentFlags().Lookup("outputFile"))
 
 	rootCmd.PersistentFlags().StringVarP(&directoryPath, "directory", "d", "", "file path for directory to convert")
 	viper.BindPFlag("directory", rootCmd.PersistentFlags().Lookup("directory"))
