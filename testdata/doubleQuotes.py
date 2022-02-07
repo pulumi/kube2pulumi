@@ -20,11 +20,11 @@ argocd_server_deployment = kubernetes.apps.v1.Deployment("argocd_serverDeploymen
         template=kubernetes.core.v1.PodTemplateSpecArgs(
             spec=kubernetes.core.v1.PodSpecArgs(
                 containers=[kubernetes.core.v1.ContainerArgs(
-                    readiness_probe={
-                        "http_get": {
-                            "port": 8080,
-                        },
-                    },
+                    readiness_probe=kubernetes.core.v1.ProbeArgs(
+                        http_get=kubernetes.core.v1.HTTPGetActionArgs(
+                            port=8080,
+                        ),
+                    ),
                 )],
             ),
         ),

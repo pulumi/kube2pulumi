@@ -37,6 +37,10 @@ func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
 	langs := getLangs()
 	for language := range langs {
+		if language == "go" {
+			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
+			continue
+		}
 		pcl, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
 		assertion.NoError(err)
 
