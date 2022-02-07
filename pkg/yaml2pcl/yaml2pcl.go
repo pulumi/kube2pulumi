@@ -80,6 +80,9 @@ func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 	diagnostics := hcl.Diagnostics{}
 
 	for _, doc := range testFiles.Docs {
+		if doc == nil || doc.Body == nil {
+			continue
+		}
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
 		header, diag := getHeader(baseNodes)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
