@@ -1,0 +1,7 @@
+apiVersion: "apps/v1"
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: server
+    aws:region: us-west-2
+  name: argocd-server
