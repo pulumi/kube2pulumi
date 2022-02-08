@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func RunConversion(dirPath string, filePath string, language string) (string, error) {
+func RunConversion(dirPath string, filePath string, outputFile string, language string) (string, error) {
 	if filePath == "" && dirPath == "" {
 		path, err := os.Getwd()
 		if err != nil {
@@ -23,12 +23,12 @@ func RunConversion(dirPath string, filePath string, language string) (string, er
 	diags := hcl.Diagnostics{}
 	// filepath only
 	if filePath != "" {
-		outPath, diags, err = kube2pulumi.Kube2PulumiFile(filePath, language)
+		outPath, diags, err = kube2pulumi.Kube2PulumiFile(filePath, outputFile, language)
 		if err != nil {
 			return "", err
 		}
 	} else { // dir only
-		outPath, diags, err = kube2pulumi.Kube2PulumiDirectory(dirPath, language)
+		outPath, diags, err = kube2pulumi.Kube2PulumiDirectory(dirPath, outputFile, language)
 		if err != nil {
 			return "", err
 		}

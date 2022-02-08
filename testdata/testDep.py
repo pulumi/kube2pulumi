@@ -37,10 +37,10 @@ default_argocd_server_deployment = kubernetes.apps.v1.Deployment("defaultArgocd_
             },
         ),
         strategy=kubernetes.apps.v1.DeploymentStrategyArgs(
-            rolling_update={
-                "max_surge": "25%",
-                "max_unavailable": "25%",
-            },
+            rolling_update=kubernetes.apps.v1.RollingUpdateDeploymentArgs(
+                max_surge="25%",
+                max_unavailable="25%",
+            ),
             type="RollingUpdate",
         ),
         template=kubernetes.core.v1.PodTemplateSpecArgs(
@@ -73,61 +73,61 @@ default_argocd_server_deployment = kubernetes.apps.v1.Deployment("defaultArgocd_
                     ],
                     image="argoproj/argocd:v1.6.1",
                     image_pull_policy="IfNotPresent",
-                    liveness_probe={
-                        "failure_threshold": 3,
-                        "http_get": {
-                            "path": "/healthz",
-                            "port": 8080,
-                            "scheme": "HTTP",
-                        },
-                        "initial_delay_seconds": 10,
-                        "period_seconds": 10,
-                        "success_threshold": 1,
-                        "timeout_seconds": 1,
-                    },
+                    liveness_probe=kubernetes.core.v1.ProbeArgs(
+                        failure_threshold=3,
+                        http_get=kubernetes.core.v1.HTTPGetActionArgs(
+                            path="/healthz",
+                            port=8080,
+                            scheme="HTTP",
+                        ),
+                        initial_delay_seconds=10,
+                        period_seconds=10,
+                        success_threshold=1,
+                        timeout_seconds=1,
+                    ),
                     name="server",
                     ports=[kubernetes.core.v1.ContainerPortArgs(
                         container_port=8080,
                         name="server",
                         protocol="TCP",
                     )],
-                    readiness_probe={
-                        "failure_threshold": 3,
-                        "http_get": {
-                            "path": "/healthz",
-                            "port": 8080,
-                            "scheme": "HTTP",
-                        },
-                        "initial_delay_seconds": 10,
-                        "period_seconds": 10,
-                        "success_threshold": 1,
-                        "timeout_seconds": 1,
-                    },
+                    readiness_probe=kubernetes.core.v1.ProbeArgs(
+                        failure_threshold=3,
+                        http_get=kubernetes.core.v1.HTTPGetActionArgs(
+                            path="/healthz",
+                            port=8080,
+                            scheme="HTTP",
+                        ),
+                        initial_delay_seconds=10,
+                        period_seconds=10,
+                        success_threshold=1,
+                        timeout_seconds=1,
+                    ),
                     resources=kubernetes.core.v1.ResourceRequirementsArgs(),
                     termination_message_path="/dev/termination-log",
                     termination_message_policy="File",
-                    volume_mounts=[{
-                        "mount_path": "/app/config/ssh",
-                        "name": "ssh-known-hosts",
-                    }],
+                    volume_mounts=[kubernetes.core.v1.VolumeMountArgs(
+                        mount_path="/app/config/ssh",
+                        name="ssh-known-hosts",
+                    )],
                 )],
                 dns_policy="ClusterFirst",
                 restart_policy="Always",
                 scheduler_name="default-scheduler",
-                security_context={},
+                security_context=kubernetes.core.v1.PodSecurityContextArgs(),
                 service_account="argocd-server",
                 service_account_name="argocd-server",
                 termination_grace_period_seconds=30,
                 volumes=[
                     kubernetes.core.v1.VolumeArgs(
-                        empty_dir={},
+                        empty_dir=kubernetes.core.v1.EmptyDirVolumeSourceArgs(),
                         name="static-files",
                     ),
                     kubernetes.core.v1.VolumeArgs(
-                        config_map={
-                            "default_mode": 420,
-                            "name": "argocd-ssh-known-hosts-cm",
-                        },
+                        config_map=kubernetes.core.v1.ConfigMapVolumeSourceArgs(
+                            default_mode=420,
+                            name="argocd-ssh-known-hosts-cm",
+                        ),
                         name="ssh-known-hosts",
                     ),
                 ],

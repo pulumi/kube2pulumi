@@ -10,12 +10,12 @@ import (
 // Kube2PulumiFile generates an output file containing the converted YAML manifest
 // file (filePath) into the specified language and returns the path of the generated
 // code file
-func Kube2PulumiFile(filePath string, language string) (string, hcl.Diagnostics, error) {
+func Kube2PulumiFile(filePath string, outputFile string, language string) (string, hcl.Diagnostics, error) {
 	pcl, diags, err := yaml2pcl.ConvertFile(filePath)
 	if err != nil {
 		return "", diags, err
 	}
-	outPath := getOutputFile(filepath.Dir(filePath), language)
+	outPath := getOutputFile(filepath.Dir(filePath), outputFile, language)
 	outFile, err := pcl2pulumi.Pcl2Pulumi(pcl, outPath, language)
 	if err != nil {
 		return "", diags, err
@@ -26,12 +26,12 @@ func Kube2PulumiFile(filePath string, language string) (string, hcl.Diagnostics,
 // Kube2PulumiDirectory generates an output file containing the converted directory
 // containing YAML manifests (directoryPath) into the specified language and returns
 // the path of the generated code file
-func Kube2PulumiDirectory(directoryPath string, language string) (string, hcl.Diagnostics, error) {
+func Kube2PulumiDirectory(directoryPath string, outputFile string, language string) (string, hcl.Diagnostics, error) {
 	pcl, diags, err := yaml2pcl.ConvertDirectory(directoryPath)
 	if err != nil {
 		return "", diags, err
 	}
-	outPath := getOutputFile(directoryPath, language)
+	outPath := getOutputFile(filepath.Dir(directoryPath), outputFile, language)
 	outFile, err := pcl2pulumi.Pcl2Pulumi(pcl, outPath, language)
 	if err != nil {
 		return "", diags, err
@@ -39,7 +39,10 @@ func Kube2PulumiDirectory(directoryPath string, language string) (string, hcl.Di
 	return outFile, diags, nil
 }
 
-func getOutputFile(dir, language string) string {
+func getOutputFile(dir, outputFile, language string) string {
+	if outputFile != "" {
+		return outputFile
+	}
 	var fName string
 	switch language {
 	case "typescript":

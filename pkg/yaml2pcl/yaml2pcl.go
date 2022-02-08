@@ -80,6 +80,9 @@ func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 	diagnostics := hcl.Diagnostics{}
 
 	for _, doc := range testFiles.Docs {
+		if doc == nil || doc.Body == nil {
+			continue
+		}
 		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
 		header, diag := getHeader(baseNodes)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
@@ -99,13 +102,26 @@ func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 	return buff.String(), diagnostics, err
 }
 
+// this will remove any incorrect quotes around the apiVersion of a yaml file
+// apiVersion: "apps/v1" is just as valid as apiVersion: apps/v1
+// so we should accept both
+func trimQuotes(s string) string {
+	if len(s) > 0 && s[0] == '"' {
+		s = s[1:]
+	}
+	if len(s) > 0 && s[len(s)-1] == '"' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
 func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	var apiVersion string
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
 			if mapValNode.Key.String() == "apiVersion" {
-				apiVersion = mapValNode.Value.String()
+				apiVersion = trimQuotes(mapValNode.Value.String())
 				break
 			}
 		}

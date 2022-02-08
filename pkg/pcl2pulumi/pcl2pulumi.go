@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/hcl/v2"
 	csgen "github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
 	gogen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
-	"github.com/pulumi/pulumi/pkg/v3/codegen/hcl2"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/hcl2/syntax"
 	tsgen "github.com/pulumi/pulumi/pkg/v3/codegen/nodejs"
+	"github.com/pulumi/pulumi/pkg/v3/codegen/pcl"
 	pygen "github.com/pulumi/pulumi/pkg/v3/codegen/python"
 )
 
@@ -67,7 +67,7 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (
 		}
 	}()
 
-	var generateProgram func(program *hcl2.Program) (map[string][]byte, hcl.Diagnostics, error)
+	var generateProgram func(program *pcl.Program) (map[string][]byte, hcl.Diagnostics, error)
 	var fileExt string
 	switch outputLanguage {
 	case "typescript", "javascript":
@@ -102,7 +102,7 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (
 			return "", err
 		}
 	}
-	program, diags, err := hcl2.BindProgram(parser.Files)
+	program, diags, err := pcl.BindProgram(parser.Files)
 	if err != nil {
 		log.Print("failed to bind program: ")
 		return "", err

@@ -31,7 +31,7 @@ func main() {
 							&corev1.ContainerArgs{
 								ReadinessProbe: &corev1.ProbeArgs{
 									HttpGet: &corev1.HTTPGetActionArgs{
-										Port: pulumi.Int(8080),
+										Port: pulumi.Any(8080),
 									},
 								},
 							},

@@ -48,8 +48,8 @@ func main() {
 				},
 				Strategy: &appsv1.DeploymentStrategyArgs{
 					RollingUpdate: &appsv1.RollingUpdateDeploymentArgs{
-						MaxSurge:       pulumi.String(fmt.Sprintf("%v%v", "25", "%")),
-						MaxUnavailable: pulumi.String(fmt.Sprintf("%v%v", "25", "%")),
+						MaxSurge:       pulumi.Any(fmt.Sprintf("%v%v", "25", "%")),
+						MaxUnavailable: pulumi.Any(fmt.Sprintf("%v%v", "25", "%")),
 					},
 					Type: pulumi.String("RollingUpdate"),
 				},
@@ -88,7 +88,7 @@ func main() {
 									FailureThreshold: pulumi.Int(3),
 									HttpGet: &corev1.HTTPGetActionArgs{
 										Path:   pulumi.String("/healthz"),
-										Port:   pulumi.Int(8080),
+										Port:   pulumi.Any(8080),
 										Scheme: pulumi.String("HTTP"),
 									},
 									InitialDelaySeconds: pulumi.Int(10),
@@ -108,7 +108,7 @@ func main() {
 									FailureThreshold: pulumi.Int(3),
 									HttpGet: &corev1.HTTPGetActionArgs{
 										Path:   pulumi.String("/healthz"),
-										Port:   pulumi.Int(8080),
+										Port:   pulumi.Any(8080),
 										Scheme: pulumi.String("HTTP"),
 									},
 									InitialDelaySeconds: pulumi.Int(10),

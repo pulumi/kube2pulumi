@@ -15,7 +15,8 @@ func Command() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			dirPath := viper.GetString("directory")
 			filePath := viper.GetString("file")
-			result, err := util.RunConversion(dirPath, filePath, "typescript")
+			outputFile := viper.GetString("outputFile")
+			result, err := util.RunConversion(dirPath, filePath, outputFile, "typescript")
 			if err != nil {
 				return err
 			}
