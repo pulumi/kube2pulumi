@@ -34,6 +34,12 @@ func Command() *cobra.Command {
 			}
 			fmt.Printf("Conversion successful! Generated File: %s\n", csharp)
 
+			java, err := util.RunConversion(dirPath, filePath, outputFile, "java")
+			if err != nil {
+				return err
+			}
+			fmt.Printf("Conversion successful! Generated File: %s\n", java)
+
 			golang, err := util.RunConversion(dirPath, filePath, outputFile, "go")
 			if err != nil {
 				return err

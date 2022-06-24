@@ -53,6 +53,8 @@ func getOutputFile(dir, outputFile, language string) string {
 		fName = "Program"
 	case "go":
 		fName = "main"
+	case "java":
+		fName = "App"
 	}
 
 	return filepath.Join(dir, fName)
