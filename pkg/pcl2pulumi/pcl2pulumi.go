@@ -11,7 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/hashicorp/hcl/v2"
+	hcl "github.com/hashicorp/hcl/v2"
+	javagen "github.com/pulumi/pulumi-java/pkg/codegen/java"
 	csgen "github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
 	gogen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
 	"github.com/pulumi/pulumi/pkg/v3/codegen/hcl2/syntax"
@@ -79,6 +80,9 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (
 	case "csharp":
 		generateProgram = csgen.GenerateProgram
 		fileExt = ".cs"
+	case "java":
+		generateProgram = javagen.GenerateProgram
+		fileExt = ".java"
 	case "go":
 		generateProgram = gogen.GenerateProgram
 		fileExt = ".go"

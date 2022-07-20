@@ -7,6 +7,7 @@ import (
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/all"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/csharp"
 	_go "github.com/pulumi/kube2pulumi/cmd/kube2pulumi/go"
+	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/java"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/python"
 	"github.com/pulumi/kube2pulumi/cmd/kube2pulumi/typescript"
 	"github.com/pulumi/kube2pulumi/pkg/version"
@@ -28,6 +29,7 @@ func configureCLI() *cobra.Command {
 	rootCmd.AddCommand(_go.Command())
 	rootCmd.AddCommand(typescript.Command())
 	rootCmd.AddCommand(csharp.Command())
+	rootCmd.AddCommand(java.Command())
 	rootCmd.AddCommand(all.Command())
 
 	rootCmd.PersistentFlags().StringVarP(&manifestFile, "file", "f", "", "YAML file to convert")

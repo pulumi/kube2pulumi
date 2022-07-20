@@ -14,6 +14,7 @@ func getLangs() map[string]string {
 		"python":     ".py",
 		"typescript": ".ts",
 		"csharp":     ".cs",
+		"java":       ".java",
 		"go":         ".go",
 	}
 }

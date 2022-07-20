@@ -1,6 +1,6 @@
 # kube2pulumi
 
-Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, and C#. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
+Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, C# and Java. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
 
 ## Live Demo
 Check out the [kube2pulumi web app](https://www.pulumi.com/kube2pulumi/) to see `kube2pulumi` in action in your browser.
@@ -64,6 +64,9 @@ $ pulumi new kubernetes-python -f
 
 // For a C# project
 $ pulumi new kubernetes-csharp -f
+
+// For a Java project
+$ pulumi new kubernetes-java -f
 ```
 
 Then run `kube2pulumi` which will write a file in the directory that
@@ -81,6 +84,9 @@ $ kube2pulumi python
 
 // For a C# project
 $ kube2pulumi csharp
+
+// For a Java project
+$ kube2pulumi java
 ```
 
 This will generate a Pulumi  program that when run with `pulumi update` will deploy the
@@ -262,6 +268,60 @@ class MyStack : Stack
         });
     }
 
+}
+```
+
+### Java
+
+```console
+kube2pulumi java -f ./pod.yaml
+```
+
+```java
+package generated_program;
+
+import com.pulumi.Context;
+import com.pulumi.Pulumi;
+import com.pulumi.core.Output;
+import com.pulumi.kubernetes.core_v1.Pod;
+import com.pulumi.kubernetes.core_v1.PodArgs;
+import com.pulumi.kubernetes.meta_v1.inputs.ObjectMetaArgs;
+import com.pulumi.kubernetes.core_v1.inputs.PodSpecArgs;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+public class App {
+    public static void main(String[] args) {
+        Pulumi.run(App::stack);
+    }
+
+    public static void stack(Context ctx) {
+        var fooBarPod = new Pod("fooBarPod", PodArgs.builder()
+                .apiVersion("v1")
+                .kind("Pod")
+                .metadata(ObjectMetaArgs.builder()
+                        .namespace("foo")
+                        .name("bar")
+                        .build())
+                .spec(PodSpecArgs.builder()
+                        .containers(ContainerArgs.builder()
+                                .name("nginx")
+                                .image("nginx:1.14-alpine")
+                                .resources(ResourceRequirementsArgs.builder()
+                                        .limits(Map.ofEntries(
+                                                Map.entry("memory", "20Mi"),
+                                                Map.entry("cpu", 0.2)
+                                        ))
+                                        .build())
+                                .build())
+                        .build())
+                .build());
+
+    }
 }
 ```
 
