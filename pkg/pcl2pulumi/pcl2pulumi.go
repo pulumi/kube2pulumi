@@ -3,7 +3,6 @@ package pcl2pulumi
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -11,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	hcl "github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2"
 	javagen "github.com/pulumi/pulumi-java/pkg/codegen/java"
 	csgen "github.com/pulumi/pulumi/pkg/v3/codegen/dotnet"
 	gogen "github.com/pulumi/pulumi/pkg/v3/codegen/go"
@@ -41,7 +40,7 @@ func Pcl2Pulumi(pcl string, outputFilePathAndName string, language string) (stri
 }
 
 func buildTempFile(pcl string) (*os.File, error) {
-	tempFile, err := ioutil.TempFile("", "pcl-*.pp")
+	tempFile, err := os.CreateTemp("", "pcl-*.pp")
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +147,7 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (
 
 	outputFileName := fmt.Sprintf("%s%s", newFileName, fileExt)
 	for _, p := range fpaths {
-		if err := ioutil.WriteFile(outputFileName, files[p], 0600); err != nil {
+		if err := os.WriteFile(outputFileName, files[p], 0600); err != nil {
 			log.Printf("failed to write output file %v: ", p)
 			return "", err
 		}

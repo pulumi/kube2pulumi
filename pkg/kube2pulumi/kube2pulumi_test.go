@@ -2,7 +2,7 @@ package kube2pulumi
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -26,7 +26,7 @@ func TestOperator(t *testing.T) {
 	langs := getLangs()
 
 	for language, ext := range langs {
-		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
 			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
 		assertion.NoError(err)
 
@@ -34,7 +34,7 @@ func TestOperator(t *testing.T) {
 		assertion.NoError(err)
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
-		generated, err := ioutil.ReadFile(path)
+		generated, err := os.ReadFile(path)
 		assertion.NoError(err)
 
 		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
@@ -104,7 +104,7 @@ func TestMultiLineString(t *testing.T) {
 	langs := getLangs()
 
 	for language, ext := range langs {
-		expected, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata",
+		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
 			fmt.Sprintf("MultilineString%s", ext)))
 		assertion.NoError(err)
 
@@ -112,7 +112,7 @@ func TestMultiLineString(t *testing.T) {
 		assertion.NoError(err)
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
-		generated, err := ioutil.ReadFile(path)
+		generated, err := os.ReadFile(path)
 		assertion.NoError(err)
 
 		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
@@ -140,7 +140,7 @@ foo_namespace = kubernetes.core.v1.Namespace("fooNamespace",
 	}
 	assertion.NoError(err)
 
-	py, err := ioutil.ReadFile(path)
+	py, err := os.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(pyExpected, string(py), "python codegen is incorrect")
@@ -168,7 +168,7 @@ const fooNamespace = new kubernetes.core.v1.Namespace("fooNamespace", {
 	}
 	assertion.NoError(err)
 
-	ts, err := ioutil.ReadFile(path)
+	ts, err := os.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(tsExpected, string(ts), "typescript codegen is incorrect")
@@ -205,7 +205,7 @@ class MyStack : Stack
 	}
 	assertion.NoError(err)
 
-	cs, err := ioutil.ReadFile(path)
+	cs, err := os.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(csExpected, string(cs), "C# codegen is incorrect")
@@ -246,7 +246,7 @@ func main() {
 	}
 	assertion.NoError(err)
 
-	_go, err := ioutil.ReadFile(path)
+	_go, err := os.ReadFile(path)
 	assertion.NoError(err)
 
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")

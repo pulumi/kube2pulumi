@@ -1,7 +1,7 @@
 package yaml2pcl
 
 import (
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -84,7 +84,7 @@ cpu = 0.2
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "Role.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "Role.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -99,7 +99,7 @@ func TestRole(t *testing.T) {
 func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -152,7 +152,7 @@ func TestMalformedHeaderYaml(t *testing.T) {
 func TestMultipleResourceGen(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "MultipleResources.pcl"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultipleResources.pcl"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -177,7 +177,7 @@ func TestEmptyDir(t *testing.T) {
 func TestAnnotationsDeployment(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -191,7 +191,7 @@ func TestAnnotationsDeployment(t *testing.T) {
 func TestNoDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -206,7 +206,7 @@ func TestNoDoubleQuotes(t *testing.T) {
 func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
@@ -221,7 +221,7 @@ func TestSpecialChar(t *testing.T) {
 func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := ioutil.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
+	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
