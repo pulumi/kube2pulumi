@@ -5,15 +5,15 @@ package yaml2pcl
 import (
 	"bytes"
 	"fmt"
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 	"io"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/goccy/go-yaml/ast"
 	"github.com/goccy/go-yaml/parser"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
 // ConvertFile returns a string conversion of the input YAML
@@ -46,7 +46,7 @@ func ConvertDirectory(dirName string) (string, hcl.Diagnostics, error) {
 	var buff bytes.Buffer
 	diagnostics := hcl.Diagnostics{}
 
-	files, err := ioutil.ReadDir(dirName)
+	files, err := os.ReadDir(dirName)
 	if err != nil {
 		return "", diagnostics, err
 	}
