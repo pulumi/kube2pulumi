@@ -1,22 +1,21 @@
+using System.Collections.Generic;
 using Pulumi;
 using Kubernetes = Pulumi.Kubernetes;
 
-class MyStack : Stack
+return await Deployment.RunAsync(() => 
 {
-    public MyStack()
+    var kube_systemCorednsConfigMap = new Kubernetes.Core.V1.ConfigMap("kube_systemCorednsConfigMap", new()
     {
-        var kube_systemCorednsConfigMap = new Kubernetes.Core.V1.ConfigMap("kube_systemCorednsConfigMap", new Kubernetes.Types.Inputs.Core.V1.ConfigMapArgs
+        ApiVersion = "v1",
+        Kind = "ConfigMap",
+        Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
         {
-            ApiVersion = "v1",
-            Kind = "ConfigMap",
-            Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
-            {
-                Name = "coredns",
-                Namespace = "kube-system",
-            },
-            Data = 
-            {
-                { "Corefile", @".:53 {
+            Name = "coredns",
+            Namespace = "kube-system",
+        },
+        Data = 
+        {
+            { "Corefile", @".:53 {
         errors
         health {
           lameduck 5s
@@ -35,8 +34,8 @@ class MyStack : Stack
         loadbalance
     }STUBDOMAINS
 " },
-            },
-        });
-    }
+        },
+    });
 
-}
+});
+

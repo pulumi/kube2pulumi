@@ -179,25 +179,24 @@ const fooNamespace = new kubernetes.core.v1.Namespace("fooNamespace", {
 func TestNamespaceDotNet(t *testing.T) {
 	assertion := assert.New(t)
 
-	csExpected := `using Pulumi;
+	csExpected := `using System.Collections.Generic;
+using Pulumi;
 using Kubernetes = Pulumi.Kubernetes;
 
-class MyStack : Stack
+return await Deployment.RunAsync(() => 
 {
-    public MyStack()
+    var fooNamespace = new Kubernetes.Core.V1.Namespace("fooNamespace", new()
     {
-        var fooNamespace = new Kubernetes.Core.V1.Namespace("fooNamespace", new Kubernetes.Types.Inputs.Core.V1.NamespaceArgs
+        ApiVersion = "v1",
+        Kind = "Namespace",
+        Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
         {
-            ApiVersion = "v1",
-            Kind = "Namespace",
-            Metadata = new Kubernetes.Types.Inputs.Meta.V1.ObjectMetaArgs
-            {
-                Name = "foo",
-            },
-        });
-    }
+            Name = "foo",
+        },
+    });
 
-}
+});
+
 `
 	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "", "csharp")
 	if diags != nil {

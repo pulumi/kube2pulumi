@@ -18,7 +18,25 @@ func main() {
 				Namespace: pulumi.String("kube-system"),
 			},
 			Data: pulumi.StringMap{
-				"Corefile": pulumi.String(fmt.Sprintf("%v%v%v%v%v%v%v%v%v%v%v%v%v%v%v%v%v%v", ".:53 {\n", "        errors\n", "        health {\n", "          lameduck 5s\n", "        }\n", "        ready\n", "        kubernetes CLUSTER_DOMAIN REVERSE_CIDRS {\n", "          fallthrough in-addr.arpa ip6.arpa\n", "        }\n", "        prometheus :9153\n", "        forward . UPSTREAMNAMESERVER {\n", "          max_concurrent 1000\n", "        }\n", "        cache 30\n", "        loop\n", "        reload\n", "        loadbalance\n", "    }STUBDOMAINS\n")),
+				"Corefile": pulumi.String(fmt.Sprintf(`.:53 {
+        errors
+        health {
+          lameduck 5s
+        }
+        ready
+        kubernetes CLUSTER_DOMAIN REVERSE_CIDRS {
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . UPSTREAMNAMESERVER {
+          max_concurrent 1000
+        }
+        cache 30
+        loop
+        reload
+        loadbalance
+    }STUBDOMAINS
+`)),
 			},
 		})
 		if err != nil {
