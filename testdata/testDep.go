@@ -48,8 +48,8 @@ func main() {
 				},
 				Strategy: &appsv1.DeploymentStrategyArgs{
 					RollingUpdate: &appsv1.RollingUpdateDeploymentArgs{
-						MaxSurge:       pulumi.Any(fmt.Sprintf("%v%v", "25", "%")),
-						MaxUnavailable: pulumi.Any(fmt.Sprintf("%v%v", "25", "%")),
+						MaxSurge:       pulumi.Any(fmt.Sprintf("25%v", "%")),
+						MaxUnavailable: pulumi.Any(fmt.Sprintf("25%v", "%")),
 					},
 					Type: pulumi.String("RollingUpdate"),
 				},
