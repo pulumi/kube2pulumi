@@ -6,124 +6,128 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/pulumi/kube2pulumi/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
-
-func getLangs() map[string]string {
-	return map[string]string{
-		"python":     ".py",
-		"typescript": ".ts",
-		"csharp":     ".cs",
-		"java":       ".java",
-		"go":         ".go",
-	}
-}
 
 // GENERALIZED TESTS
 
 func TestDoubleQuotes(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
+	for language := range testutil.Languages() {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "doubleQuotes"))
+			pcl, err := os.ReadFile(filepath.Join(testDir, "doubleQuotes.pp"))
+			assertion.NoError(err)
 
-	for language := range langs {
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
-		assertion.NoError(err)
-
-		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "doubleQuotes"), language)
-		assertion.NoError(err)
+			_, err = Pcl2Pulumi(string(pcl), filepath.Join(testDir, "doubleQuotes"), language)
+			assertion.NoError(err)
+		})
 	}
 }
 
 func TestSpecialChar(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
-		if language == "go" {
-			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
-			continue
-		}
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
-		assertion.NoError(err)
+	for language := range testutil.Languages() {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "specialChar"))
+			pcl, err := os.ReadFile(filepath.Join(testDir, "specialChar.pp"))
+			assertion.NoError(err)
 
-		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "specialChar"), language)
-		assertion.NoError(err)
+			_, err = Pcl2Pulumi(string(pcl), filepath.Join(testDir, "specialChar"), language)
+			assertion.NoError(err)
+		})
 	}
 }
 
 func TestAnnotations(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
-		assertion.NoError(err)
+	for language := range testutil.Languages() {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "testDep"))
+			pcl, err := os.ReadFile(filepath.Join(testDir, "testDep.pp"))
+			assertion.NoError(err)
 
-		_, err = Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "testDep"), language)
-		assertion.NoError(err)
+			_, err = Pcl2Pulumi(string(pcl), filepath.Join(testDir, "testDep"), language)
+			assertion.NoError(err)
+		})
 	}
 }
 
 func TestNamespace(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
+	for language, ext := range testutil.Languages() {
+		language, ext := language, ext
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedNamespace%s", ext)))
+			assertion.NoError(err)
 
-	for language, ext := range langs {
-		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
-			"expNamespace", fmt.Sprintf("expectedNamespace%s", ext)))
-		assertion.NoError(err)
+			pcl, err := os.ReadFile(filepath.Join(testDir, "Namespace.pp"))
+			assertion.NoError(err)
 
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "Namespace.pp"))
-		assertion.NoError(err)
+			outPath, err := Pcl2Pulumi(string(pcl), filepath.Join(testDir, "Namespace"), language)
+			assertion.NoError(err)
 
-		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "Namespace"), language)
-		assertion.NoError(err)
+			generated, err := os.ReadFile(outPath)
+			assertion.NoError(err)
 
-		generated, err := os.ReadFile(outPath)
-		assertion.NoError(err)
-
-		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+		})
 	}
 }
 
 func TestOperator(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
+	for language, ext := range testutil.Languages() {
+		language, ext := language, ext
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMain%s", ext)))
+			assertion.NoError(err)
 
-	for language, ext := range langs {
-		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
-			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
-		assertion.NoError(err)
+			pcl, err := os.ReadFile(filepath.Join(testDir, "expected", "expectedK8sOperator.pp"))
+			assertion.NoError(err)
 
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
-		assertion.NoError(err)
+			outPath, err := Pcl2Pulumi(string(pcl), filepath.Join(testDir, "main"), language)
+			assertion.NoError(err)
 
-		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "k8sOperator", "main"), language)
-		assertion.NoError(err)
+			generated, err := os.ReadFile(outPath)
+			assertion.NoError(err)
 
-		generated, err := os.ReadFile(outPath)
-		assertion.NoError(err)
-
-		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+		})
 	}
 }
 
 func TestMultiLineString(t *testing.T) {
-	assertion := assert.New(t)
-	langs := getLangs()
+	for language, ext := range testutil.Languages() {
+		language, ext := language, ext
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext)))
+			assertion.NoError(err)
 
-	for language, ext := range langs {
-		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
-			fmt.Sprintf("expectedMultilineString%s", ext)))
-		assertion.NoError(err)
+			pcl, err := os.ReadFile(filepath.Join(testDir, "MultilineString.pp"))
+			assertion.NoError(err)
 
-		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
-		assertion.NoError(err)
+			outPath, err := Pcl2Pulumi(string(pcl), testDir, language)
+			assertion.NoError(err)
 
-		outPath, err := Pcl2Pulumi(string(pcl), filepath.Join("..", "..", "testdata", "MultilineString"), language)
-		assertion.NoError(err)
+			generated, err := os.ReadFile(outPath)
+			assertion.NoError(err)
 
-		generated, err := os.ReadFile(outPath)
-		assertion.NoError(err)
-
-		assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+		})
 	}
 }

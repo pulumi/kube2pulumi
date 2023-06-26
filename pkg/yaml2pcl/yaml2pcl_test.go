@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/pulumi/kube2pulumi/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,8 @@ name = "foo"
 }
 }
 `
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "Namespace.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -39,7 +41,8 @@ name = "foo"
 }
 }
 `
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "NamespaceWithComments.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "NamespaceWithComments.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -73,7 +76,8 @@ cpu = 0.2
 }
 }
 `
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "OnePodArray.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "OnePodArray"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "OnePodArray.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -84,11 +88,12 @@ cpu = 0.2
 func TestRole(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "Role.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Role"))
+	b, err := os.ReadFile(filepath.Join(testDir, "Role.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "Role.yaml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "Role.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -99,11 +104,12 @@ func TestRole(t *testing.T) {
 func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "expK8sOperator.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
+	b, err := os.ReadFile(filepath.Join(testDir, "expected", "expectedK8sOperator.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertDirectory(filepath.Join("..", "..", "testdata", "k8sOperator/"))
+	result, diags, err := ConvertDirectory(testDir)
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -123,7 +129,8 @@ name = "foo"
 }
 }
 `
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "NamespaceWithTrailingComment.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "NamespaceWithTrailingComment.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -134,7 +141,10 @@ name = "foo"
 func TestIncorrectPath(t *testing.T) {
 	assertion := assert.New(t)
 	fakePath := "fakePath"
-	_, _, err := ConvertFile(fakePath)
+	// Assert fakePath does not exist
+	_, err := os.Stat(fakePath)
+	assertion.True(os.IsNotExist(err))
+	_, _, err = ConvertFile(fakePath)
 	assertion.Error(err)
 	_, _, err = ConvertDirectory(fakePath)
 	assertion.Error(err)
@@ -142,7 +152,8 @@ func TestIncorrectPath(t *testing.T) {
 
 func TestMalformedHeaderYaml(t *testing.T) {
 	assertion := assert.New(t)
-	_, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MalformedYaml.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MalformedYaml"))
+	_, diags, err := ConvertFile(filepath.Join(testDir, "MalformedYaml.yaml"))
 	if diags != nil {
 		assertion.True(diags.HasErrors(), "diagnostics incorrectly displayed for wrongly formatted yaml")
 	}
@@ -152,11 +163,12 @@ func TestMalformedHeaderYaml(t *testing.T) {
 func TestMultipleResourceGen(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultipleResources.pcl"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultipleResources"))
+	b, err := os.ReadFile(filepath.Join(testDir, "MultipleResources.pcl"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MultipleResources.yml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "MultipleResources.yml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -166,7 +178,8 @@ func TestMultipleResourceGen(t *testing.T) {
 
 func TestEmptyDir(t *testing.T) {
 	assertion := assert.New(t)
-	_, diags, err := ConvertDirectory(filepath.Join("..", "..", "testdata", "empty/"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "empty"))
+	_, diags, err := ConvertDirectory(testDir)
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -177,11 +190,12 @@ func TestEmptyDir(t *testing.T) {
 func TestAnnotationsDeployment(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "testDep.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "testDep"))
+	b, err := os.ReadFile(filepath.Join(testDir, "testDep.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "testDep.yaml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "testDep.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -191,11 +205,12 @@ func TestAnnotationsDeployment(t *testing.T) {
 func TestNoDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "doubleQuotes"))
+	b, err := os.ReadFile(filepath.Join(testDir, "doubleQuotes.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "doubleQuotes.yaml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "doubleQuotes.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -206,11 +221,12 @@ func TestNoDoubleQuotes(t *testing.T) {
 func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "specialChar.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "specialChar"))
+	b, err := os.ReadFile(filepath.Join(testDir, "specialChar.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "specialChar.yaml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "specialChar.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -221,11 +237,12 @@ func TestSpecialChar(t *testing.T) {
 func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
 
-	b, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString.pp"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
+	b, err := os.ReadFile(filepath.Join(testDir, "MultilineString.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 
-	result, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "MultilineString.yaml"))
+	result, diags, err := ConvertFile(filepath.Join(testDir, "MultilineString.yaml"))
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -235,7 +252,8 @@ func TestMultiLineString(t *testing.T) {
 
 func TestCRD(t *testing.T) {
 	assertion := assert.New(t)
-	_, diags, err := ConvertFile(filepath.Join("..", "..", "testdata", "customResourceDef.yaml"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "crd"))
+	_, diags, err := ConvertFile(filepath.Join(testDir, "customResourceDef.yaml"))
 	if diags != nil {
 		assertion.True(diags.HasErrors(), "diagnostics not detecting CRD")
 	}
@@ -244,6 +262,7 @@ func TestCRD(t *testing.T) {
 
 func TestNotYaml(t *testing.T) {
 	assertion := assert.New(t)
-	_, _, err := ConvertFile(filepath.Join("..", "..", "testdata", "empty", "notYAML.txt"))
+	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "empty"))
+	_, _, err := ConvertFile(filepath.Join(testDir, "notYAML.txt"))
 	assertion.Error(err)
 }
