@@ -4,9 +4,6 @@ dist/
 # Ignore generated files from test runs.
 testdata/__main__.py
 testdata/App.java
-testdata/index.ts
-testdata/main.go
-testdata/Program.cs
 testdata/doubleQuotes/__main__.py
 testdata/doubleQuotes/App.java
 testdata/doubleQuotes/doubleQuotes.cs
@@ -14,10 +11,12 @@ testdata/doubleQuotes/doubleQuotes.go
 testdata/doubleQuotes/doubleQuotes.java
 testdata/doubleQuotes/doubleQuotes.py
 testdata/doubleQuotes/doubleQuotes.ts
+testdata/index.ts
 testdata/k8sOperator/main.cs
 testdata/k8sOperator/main.go
 testdata/k8sOperator/main.py
 testdata/k8sOperator/main.ts
+testdata/main.go
 testdata/MultilineString.cs
 testdata/MultilineString.go
 testdata/MultilineString.java
@@ -37,13 +36,16 @@ testdata/Namespace/Namespace.java
 testdata/Namespace/Namespace.py
 testdata/Namespace/Namespace.ts
 testdata/Namespace/Program.cs
+testdata/Program.cs
 testdata/quotedApiVersion/__main__.py
 testdata/quotedApiVersion/App.java
 testdata/quotedApiVersion/index.ts
+testdata/quotedApiVersion/main.go
 testdata/quotedApiVersion/Program.cs
 testdata/specialChar/__main__.py
 testdata/specialChar/App.java
 testdata/specialChar/index.ts
+testdata/specialChar/main.go
 testdata/specialChar/Program.cs
 testdata/specialChar/specialChar.cs
 testdata/specialChar/specialChar.java

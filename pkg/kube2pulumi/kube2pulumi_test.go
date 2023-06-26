@@ -47,10 +47,6 @@ func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
 
 	for language := range testutil.Languages() {
-		if language == "go" {
-			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
-			continue
-		}
 		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar", "specialChar.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
@@ -63,10 +59,6 @@ func TestQuotedApiVersion(t *testing.T) {
 	assertion := assert.New(t)
 
 	for language := range testutil.Languages() {
-		if language == "go" {
-			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
-			continue
-		}
 		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "quotedApiVersion", "quotedApiVersion.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
