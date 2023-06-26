@@ -46,7 +46,7 @@ func TestDoubleQuotes(t *testing.T) {
 	langs := getLangs()
 
 	for language := range langs {
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes.yaml"), "", language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes", "doubleQuotes.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -62,7 +62,7 @@ func TestSpecialChar(t *testing.T) {
 			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
 			continue
 		}
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar.yaml"), "", language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "specialChar", "specialChar.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -78,7 +78,7 @@ func TestQuotedApiVersion(t *testing.T) {
 			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
 			continue
 		}
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "quotedApiVersion.yaml"), "", language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "quotedApiVersion", "quotedApiVersion.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -91,7 +91,7 @@ func TestAnnotations(t *testing.T) {
 	langs := getLangs()
 
 	for language := range langs {
-		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep.yaml"), "", language)
+		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep", "testDep.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 		}
@@ -104,11 +104,11 @@ func TestMultiLineString(t *testing.T) {
 	langs := getLangs()
 
 	for language, ext := range langs {
-		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
+		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString",
 			fmt.Sprintf("MultilineString%s", ext)))
 		assertion.NoError(err)
 
-		path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "MultilineString.yaml"), "", language)
+		path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "MultilineString", "MultilineString.yaml"), "", language)
 		assertion.NoError(err)
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
@@ -134,7 +134,7 @@ foo_namespace = kubernetes.core.v1.Namespace("fooNamespace",
         name="foo",
     ))
 `
-	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "", "python")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace", "Namespace.yaml"), "", "python")
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -162,7 +162,7 @@ const fooNamespace = new kubernetes.core.v1.Namespace("fooNamespace", {
     },
 });
 `
-	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "", "typescript")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace", "Namespace.yaml"), "", "typescript")
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -198,7 +198,7 @@ return await Deployment.RunAsync(() =>
 });
 
 `
-	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "", "csharp")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace", "Namespace.yaml"), "", "csharp")
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
@@ -239,7 +239,7 @@ func main() {
 	})
 }
 `
-	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace.yaml"), "", "go")
+	path, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "Namespace", "Namespace.yaml"), "", "go")
 	if diags != nil {
 		assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 	}
