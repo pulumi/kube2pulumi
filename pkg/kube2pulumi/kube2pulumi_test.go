@@ -255,3 +255,20 @@ func main() {
 
 	assertion.Equal(goExpected, string(_go), "golang codegen is incorrect")
 }
+
+func TestStringLiteral(t *testing.T) {
+	for language := range testutil.Languages() {
+		language := language
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "stringLiteral"))
+			kubeManifest := filepath.Join(testDir, "cm.yaml")
+			_, diags, err := Kube2PulumiFile(kubeManifest, "", language)
+			if diags != nil {
+				assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+			}
+			assertion.NoError(err)
+		})
+	}
+}
