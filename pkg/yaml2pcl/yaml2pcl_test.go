@@ -105,7 +105,7 @@ func TestDirk8sOperator(t *testing.T) {
 	assertion := assert.New(t)
 
 	testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
-	b, err := os.ReadFile(filepath.Join(testDir, "expK8sOperator.pp"))
+	b, err := os.ReadFile(filepath.Join(testDir, "expected", "expectedK8sOperator.pp"))
 	assertion.NoError(err)
 	expected := string(b)
 

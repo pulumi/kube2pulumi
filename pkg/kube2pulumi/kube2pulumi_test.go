@@ -19,7 +19,7 @@ func TestOperator(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
-			expected, err := os.ReadFile(filepath.Join(testDir, fmt.Sprintf("expectedMain%s", ext)))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMain%s", ext)))
 			assertion.NoError(err)
 
 			path, diags, err := Kube2PulumiDirectory(testDir, "", language)
@@ -105,7 +105,7 @@ func TestMultiLineString(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
-			expected, err := os.ReadFile(filepath.Join(testDir, fmt.Sprintf("expectedMultilineString%s", ext)))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext)))
 			assertion.NoError(err)
 
 			path, diags, err := Kube2PulumiFile(filepath.Join(testDir, "MultilineString.yaml"), "", language)

@@ -67,7 +67,7 @@ func TestNamespace(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
-			expected, err := os.ReadFile(filepath.Join(testDir, fmt.Sprintf("expectedNamespace%s", ext)))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedNamespace%s", ext)))
 			assertion.NoError(err)
 
 			pcl, err := os.ReadFile(filepath.Join(testDir, "Namespace.pp"))
@@ -91,10 +91,10 @@ func TestOperator(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
-			expected, err := os.ReadFile(filepath.Join(testDir, fmt.Sprintf("expectedMain%s", ext)))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMain%s", ext)))
 			assertion.NoError(err)
 
-			pcl, err := os.ReadFile(filepath.Join(testDir, "expK8sOperator.pp"))
+			pcl, err := os.ReadFile(filepath.Join(testDir, "expected", "expectedK8sOperator.pp"))
 			assertion.NoError(err)
 
 			outPath, err := Pcl2Pulumi(string(pcl), filepath.Join(testDir, "main"), language)
@@ -115,7 +115,7 @@ func TestMultiLineString(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
-			expected, err := os.ReadFile(filepath.Join(testDir, fmt.Sprintf("expectedMultilineString%s", ext)))
+			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext)))
 			assertion.NoError(err)
 
 			pcl, err := os.ReadFile(filepath.Join(testDir, "MultilineString.pp"))
