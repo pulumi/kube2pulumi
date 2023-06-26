@@ -6,26 +6,16 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/pulumi/kube2pulumi/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
-
-func getLangs() map[string]string {
-	return map[string]string{
-		"python":     ".py",
-		"typescript": ".ts",
-		"csharp":     ".cs",
-		"java":       ".java",
-		"go":         ".go",
-	}
-}
 
 // GENERAL TESTS
 
 func TestOperator(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language, ext := range langs {
+	for language, ext := range testutil.Languages() {
 		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
 			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
 		assertion.NoError(err)
@@ -43,9 +33,8 @@ func TestOperator(t *testing.T) {
 
 func TestDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language := range langs {
+	for language := range testutil.Languages() {
 		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "doubleQuotes", "doubleQuotes.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
@@ -56,8 +45,8 @@ func TestDoubleQuotes(t *testing.T) {
 
 func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
+
+	for language := range testutil.Languages() {
 		if language == "go" {
 			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
 			continue
@@ -72,8 +61,8 @@ func TestSpecialChar(t *testing.T) {
 
 func TestQuotedApiVersion(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
+
+	for language := range testutil.Languages() {
 		if language == "go" {
 			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
 			continue
@@ -88,9 +77,8 @@ func TestQuotedApiVersion(t *testing.T) {
 
 func TestAnnotations(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language := range langs {
+	for language := range testutil.Languages() {
 		_, diags, err := Kube2PulumiFile(filepath.Join("..", "..", "testdata", "testDep", "testDep.yaml"), "", language)
 		if diags != nil {
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
@@ -101,9 +89,8 @@ func TestAnnotations(t *testing.T) {
 
 func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language, ext := range langs {
+	for language, ext := range testutil.Languages() {
 		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString",
 			fmt.Sprintf("MultilineString%s", ext)))
 		assertion.NoError(err)

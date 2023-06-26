@@ -6,26 +6,16 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/pulumi/kube2pulumi/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 )
-
-func getLangs() map[string]string {
-	return map[string]string{
-		"python":     ".py",
-		"typescript": ".ts",
-		"csharp":     ".cs",
-		"java":       ".java",
-		"go":         ".go",
-	}
-}
 
 // GENERALIZED TESTS
 
 func TestDoubleQuotes(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language := range langs {
+	for language := range testutil.Languages() {
 		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "doubleQuotes", "doubleQuotes.pp"))
 		assertion.NoError(err)
 
@@ -36,8 +26,8 @@ func TestDoubleQuotes(t *testing.T) {
 
 func TestSpecialChar(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
+
+	for language := range testutil.Languages() {
 		if language == "go" {
 			// will be able to run in tests when https://github.com/pulumi/pulumi/issues/8940 is complete
 			continue
@@ -52,8 +42,8 @@ func TestSpecialChar(t *testing.T) {
 
 func TestAnnotations(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
-	for language := range langs {
+
+	for language := range testutil.Languages() {
 		pcl, err := os.ReadFile(filepath.Join("..", "..", "testdata", "testDep", "testDep.pp"))
 		assertion.NoError(err)
 
@@ -64,9 +54,8 @@ func TestAnnotations(t *testing.T) {
 
 func TestNamespace(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language, ext := range langs {
+	for language, ext := range testutil.Languages() {
 		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
 			"Namespace", fmt.Sprintf("expectedNamespace%s", ext)))
 		assertion.NoError(err)
@@ -86,9 +75,8 @@ func TestNamespace(t *testing.T) {
 
 func TestOperator(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language, ext := range langs {
+	for language, ext := range testutil.Languages() {
 		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata",
 			"k8sOperator", fmt.Sprintf("expectedMain%s", ext)))
 		assertion.NoError(err)
@@ -108,9 +96,8 @@ func TestOperator(t *testing.T) {
 
 func TestMultiLineString(t *testing.T) {
 	assertion := assert.New(t)
-	langs := getLangs()
 
-	for language, ext := range langs {
+	for language, ext := range testutil.Languages() {
 		expected, err := os.ReadFile(filepath.Join("..", "..", "testdata", "MultilineString",
 			fmt.Sprintf("expectedMultilineString%s", ext)))
 		assertion.NoError(err)
