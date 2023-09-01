@@ -1,6 +1,6 @@
 module github.com/pulumi/kube2pulumi
 
-go 1.19
+go 1.20
 
 require (
 	github.com/goccy/go-yaml v1.9.5
