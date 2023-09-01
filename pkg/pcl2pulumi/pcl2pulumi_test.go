@@ -66,9 +66,9 @@ func TestNamespace(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "Namespace"))
-			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedNamespace%s", ext)))
-			assertion.NoError(err)
+			testdataDir := filepath.Join("..", "..", "testdata", "Namespace")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expected := filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedNamespace%s", ext))
 
 			pcl, err := os.ReadFile(filepath.Join(testDir, "Namespace.pp"))
 			assertion.NoError(err)
@@ -76,10 +76,7 @@ func TestNamespace(t *testing.T) {
 			outPath, err := Pcl2Pulumi(string(pcl), filepath.Join(testDir, "Namespace"), language)
 			assertion.NoError(err)
 
-			generated, err := os.ReadFile(outPath)
-			assertion.NoError(err)
-
-			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			testutil.AssertFilesEqual(t, expected, outPath)
 		})
 	}
 }
@@ -90,9 +87,9 @@ func TestOperator(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
-			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMain%s", ext)))
-			assertion.NoError(err)
+			testdataDir := filepath.Join("..", "..", "testdata", "k8sOperator")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expected := filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedMain%s", ext))
 
 			pcl, err := os.ReadFile(filepath.Join(testDir, "expected", "expectedK8sOperator.pp"))
 			assertion.NoError(err)
@@ -100,10 +97,7 @@ func TestOperator(t *testing.T) {
 			outPath, err := Pcl2Pulumi(string(pcl), filepath.Join(testDir, "main"), language)
 			assertion.NoError(err)
 
-			generated, err := os.ReadFile(outPath)
-			assertion.NoError(err)
-
-			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			testutil.AssertFilesEqual(t, expected, outPath)
 		})
 	}
 }
@@ -114,9 +108,10 @@ func TestMultiLineString(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
-			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext)))
-			assertion.NoError(err)
+			testdataDir := filepath.Join("..", "..", "testdata", "MultilineString")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expectedPath := filepath.Join(testdataDir, "expected",
+				fmt.Sprintf("expectedMultilineString%s", ext))
 
 			pcl, err := os.ReadFile(filepath.Join(testDir, "MultilineString.pp"))
 			assertion.NoError(err)
@@ -124,10 +119,7 @@ func TestMultiLineString(t *testing.T) {
 			outPath, err := Pcl2Pulumi(string(pcl), testDir, language)
 			assertion.NoError(err)
 
-			generated, err := os.ReadFile(outPath)
-			assertion.NoError(err)
-
-			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			testutil.AssertFilesEqual(t, expectedPath, outPath)
 		})
 	}
 }

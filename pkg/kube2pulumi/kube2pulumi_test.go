@@ -18,18 +18,16 @@ func TestOperator(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "k8sOperator"))
-			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMain%s", ext)))
-			assertion.NoError(err)
+			testdataDir := filepath.Join("..", "..", "testdata", "k8sOperator")
+			testDir := testutil.MakeTestDir(t, testdataDir)
 
 			path, diags, err := Kube2PulumiDirectory(testDir, "", language)
 			assertion.NoError(err)
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
-			generated, err := os.ReadFile(path)
-			assertion.NoError(err)
-
-			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			testutil.AssertFilesEqual(t,
+				filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedMain%s", ext)),
+				path)
 		})
 	}
 }
@@ -104,18 +102,15 @@ func TestMultiLineString(t *testing.T) {
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "MultilineString"))
-			expected, err := os.ReadFile(filepath.Join(testDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext)))
-			assertion.NoError(err)
+			testdataDir := filepath.Join("..", "..", "testdata", "MultilineString")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expected := filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedMultilineString%s", ext))
 
 			path, diags, err := Kube2PulumiFile(filepath.Join(testDir, "MultilineString.yaml"), "", language)
 			assertion.NoError(err)
 			assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 
-			generated, err := os.ReadFile(path)
-			assertion.NoError(err)
-
-			assertion.Equal(string(expected), string(generated), fmt.Sprintf("%s codegen is incorrect", language))
+			testutil.AssertFilesEqual(t, expected, path)
 		})
 	}
 }
@@ -222,8 +217,8 @@ func TestNamespaceGo(t *testing.T) {
 	goExpected := `package main
 
 import (
-	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/core/v1"
-	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v3/go/kubernetes/meta/v1"
+	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
+	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
 )
 

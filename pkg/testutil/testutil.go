@@ -1,10 +1,16 @@
 package testutil
 
 import (
+	"os"
 	"testing"
 
+	"github.com/pulumi/pulumi/sdk/v3/go/common/util/cmdutil"
 	"github.com/pulumi/pulumi/sdk/v3/go/common/util/fsutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+var pulumiAccept = cmdutil.IsTruthy(os.Getenv("PULUMI_ACCEPT"))
 
 // Languages returns a map of supported languages for conversion, and their default extensions.
 func Languages() map[string]string {
@@ -30,4 +36,22 @@ func MakeTestDir(t *testing.T, sourceDir string) string {
 	}
 
 	return tmpDir
+}
+
+// Assert that the contents of two files are equal.
+//
+// To update the expected file, run the test with PULUMI_ACCEPT=true.
+func AssertFilesEqual(t *testing.T, expectedPath, generatedPath string) {
+	generated, err := os.ReadFile(generatedPath)
+	require.NoError(t, err)
+
+	if pulumiAccept {
+		err := os.WriteFile(expectedPath, generated, 0700)
+		assert.NoError(t, err)
+	} else {
+		expected, err := os.ReadFile(expectedPath)
+		require.NoError(t, err)
+		assert.Equal(t, string(expected), string(generated), "codegen is incorrect")
+	}
+
 }
