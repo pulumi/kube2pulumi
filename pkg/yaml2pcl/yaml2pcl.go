@@ -288,7 +288,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 					s = s[:len(s)-1]
 				}
 			}
-			s = strings.ReplaceAll(s, "$", "$$")
+			s = strings.ReplaceAll(s, "${", "$${")
 			strVal := fmt.Sprintf("%q%s", s, suffix)
 			_, err = fmt.Fprintf(totalPCL, "%s\n", strVal)
 			if err != nil {

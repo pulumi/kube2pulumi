@@ -259,11 +259,17 @@ func TestStringLiteral(t *testing.T) {
 			assertion := assert.New(t)
 			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "stringLiteral"))
 			kubeManifest := filepath.Join(testDir, "cm.yaml")
-			_, diags, err := Kube2PulumiFile(kubeManifest, "", language)
+			outFile, diags, err := Kube2PulumiFile(kubeManifest, "", language)
 			if diags != nil {
 				assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 			}
 			assertion.NoError(err)
+
+			// Ensure that the generated file does not contain $$. This is a sign that the string literal was not
+			// properly escaped.
+			generated, err := os.ReadFile(outFile)
+			assertion.NoError(err)
+			assertion.NotContains(string(generated), "$$")
 		})
 	}
 }

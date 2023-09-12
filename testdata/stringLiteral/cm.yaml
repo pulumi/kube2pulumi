@@ -3,4 +3,25 @@ kind: ConfigMap
 metadata:
   name: myapp
 data:
+  key: "{\"uid\": \"$(datasource)\"}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-var
+data:
   key: "{\"uid\": \"${datasource}\"}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-no-end-bracket
+data:
+  key: "{\"uid\": \"${datasource\"}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-no-brackets
+data:
+  key: "{\"uid\": \"${datasource\""
