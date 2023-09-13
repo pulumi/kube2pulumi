@@ -52,7 +52,7 @@ public class App {
             .metadata(ObjectMetaArgs.builder()
                 .name("myapp-no-brackets")
                 .build())
-            .data(Map.of("key", "{\\\"uid\\\": \\\"${datasource\\\""))
+            .data(Map.of("key", "{\\\"uid\\\": \\\"$datasource\\\""))
             .build());
 
     }

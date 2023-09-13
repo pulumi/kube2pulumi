@@ -24,4 +24,4 @@ kind: ConfigMap
 metadata:
   name: myapp-no-brackets
 data:
-  key: "{\"uid\": \"${datasource\""
+  key: "{\"uid\": \"$datasource\""

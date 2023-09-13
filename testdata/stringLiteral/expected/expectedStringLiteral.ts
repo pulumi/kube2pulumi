@@ -38,6 +38,6 @@ const myapp_no_bracketsConfigMap = new kubernetes.core.v1.ConfigMap("myapp_no_br
         name: "myapp-no-brackets",
     },
     data: {
-        key: `{\"uid\": \"${datasource\"`,
+        key: `{\"uid\": \"$datasource\"`,
     },
 });

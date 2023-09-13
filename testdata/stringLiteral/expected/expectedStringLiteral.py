@@ -35,5 +35,5 @@ myapp_no_brackets_config_map = kubernetes.core.v1.ConfigMap("myapp_no_bracketsCo
         name="myapp-no-brackets",
     ),
     data={
-        "key": "{\\\"uid\\\": \\\"${datasource\\\"",
+        "key": "{\\\"uid\\\": \\\"$datasource\\\"",
     })

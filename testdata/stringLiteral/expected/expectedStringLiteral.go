@@ -56,7 +56,7 @@ func main() {
 				Name: pulumi.String("myapp-no-brackets"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"${datasource\\\"")),
+				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"$datasource\\\"")),
 			},
 		})
 		if err != nil {

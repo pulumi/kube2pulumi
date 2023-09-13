@@ -56,7 +56,7 @@ return await Deployment.RunAsync(() =>
         },
         Data = 
         {
-            { "key", "{\\\"uid\\\": \\\"${datasource\\\"" },
+            { "key", "{\\\"uid\\\": \\\"$datasource\\\"" },
         },
     });
 
