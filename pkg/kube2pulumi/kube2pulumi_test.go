@@ -252,18 +252,23 @@ func main() {
 }
 
 func TestStringLiteral(t *testing.T) {
-	for language := range testutil.Languages() {
-		language := language
+	for language, ext := range testutil.Languages() {
+		language, ext := language, ext
 		t.Run(language, func(t *testing.T) {
 			t.Parallel()
 			assertion := assert.New(t)
-			testDir := testutil.MakeTestDir(t, filepath.Join("..", "..", "testdata", "stringLiteral"))
+			testdataDir := filepath.Join("..", "..", "testdata", "stringLiteral")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expected := filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedStringLiteral%s", ext))
+
 			kubeManifest := filepath.Join(testDir, "cm.yaml")
-			_, diags, err := Kube2PulumiFile(kubeManifest, "", language)
+			outPath, diags, err := Kube2PulumiFile(kubeManifest, "", language)
 			if diags != nil {
 				assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
 			}
 			assertion.NoError(err)
+
+			testutil.AssertFilesEqual(t, expected, outPath)
 		})
 	}
 }
