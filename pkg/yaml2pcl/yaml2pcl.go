@@ -225,6 +225,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		multLine := node.String()
 		multLine = strings.TrimPrefix(multLine, "|")
 		multLine = strings.TrimSpace(multLine)
+		// Escape any ${} interpolation sequences.
+		multLine = strings.ReplaceAll(multLine, "${", "$${")
 		_, err = fmt.Fprintf(totalPCL, "<<EOF\n%s\nEOF\n", multLine)
 		if err != nil {
 			return err
