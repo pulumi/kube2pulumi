@@ -454,7 +454,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 			if value.Type() == ast.MappingValueType {
-				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", "")
+				_, err = fmt.Fprintf(totalPCL, "%s%s\n", "}", suffix)
 				if err != nil {
 					return err
 				}
