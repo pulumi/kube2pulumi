@@ -272,3 +272,27 @@ func TestStringLiteral(t *testing.T) {
 		})
 	}
 }
+
+// Tests that suffix is correctly applied for sequences of mapping values.
+// See https://github.com/pulumi/kube2pulumi/issues/97.
+func TestSequenceOfMappingValues(t *testing.T) {
+	for language, ext := range testutil.Languages() {
+		language, ext := language, ext
+		t.Run(language, func(t *testing.T) {
+			t.Parallel()
+			assertion := assert.New(t)
+			testdataDir := filepath.Join("..", "..", "testdata", "cilium")
+			testDir := testutil.MakeTestDir(t, testdataDir)
+			expected := filepath.Join(testdataDir, "expected", fmt.Sprintf("expectedCilium%s", ext))
+
+			kubeManifest := filepath.Join(testDir, "manifest.yaml")
+			outPath, diags, err := Kube2PulumiFile(kubeManifest, "", language)
+			if diags != nil {
+				assertion.False(diags.HasErrors(), "diagnostics incorrectly displayed for proper yaml")
+			}
+			assertion.NoError(err)
+
+			testutil.AssertFilesEqual(t, expected, outPath)
+		})
+	}
+}
