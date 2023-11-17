@@ -121,7 +121,10 @@ func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
 			if mapValNode.Key.String() == "apiVersion" {
+				comment := mapValNode.Value.GetComment()
+				mapValNode.Value.SetComment(nil)
 				apiVersion = trimQuotes(mapValNode.Value.String())
+				mapValNode.Value.SetComment(comment)
 				break
 			}
 		}
@@ -175,20 +178,32 @@ func resourceName(nodes []ast.Node) (string, string) {
 	for _, node := range nodes {
 		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
 			if len(kind) == 0 && mapValNode.Key.String() == "kind" {
+				comment := mapValNode.Value.GetComment()
+				mapValNode.Value.SetComment(nil)
 				kind = mapValNode.Value.String()
+				mapValNode.Value.SetComment(comment)
 				continue
 			}
 			if mapValNode.Key.String() == "metadata" {
 				if mapValNode.Value.Type() == ast.StringType {
+					comment := mapValNode.Value.GetComment()
+					mapValNode.Value.SetComment(nil)
 					name = mapValNode.Value.String()
+					mapValNode.Value.SetComment(comment)
 					continue
 				} else {
 					for _, inner := range ast.Filter(ast.MappingValueType, node) {
 						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
 							if innerMvNode.Key.String() == "name" {
+								comment := innerMvNode.Value.GetComment()
+								innerMvNode.Value.SetComment(nil)
 								name = innerMvNode.Value.String()
+								innerMvNode.Value.SetComment(comment)
 							} else if innerMvNode.Key.String() == "namespace" {
+								comment := innerMvNode.Value.GetComment()
+								innerMvNode.Value.SetComment(nil)
 								ns = innerMvNode.Value.String()
+								innerMvNode.Value.SetComment(comment)
 							}
 						}
 					}
@@ -222,6 +237,11 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	tk := node.GetToken()
 	switch n := node.(type) {
 	case *ast.LiteralNode:
+		// Grab any trailing comment, but set the comment to nil so that it doesn't get pasted into
+		// the string representation of the literal as well.
+		comment := addComment(node)
+		node.SetComment(nil)
+
 		multLine := node.String()
 		multLine = strings.TrimPrefix(multLine, "|")
 		multLine = strings.TrimSpace(multLine)
@@ -231,7 +251,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		if err != nil {
 			return err
 		}
-		comment := addComment(node)
+
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -276,6 +296,8 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
+			comment := addComment(node)
+			node.SetComment(nil)
 			s := n.String()
 			// Remove leading quote if present.
 			if len(s) > 0 && (s[0] == '"' || s[0] == '\'') {
@@ -297,7 +319,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 			// add comments on the same line
-			comment := addComment(node)
 			if comment != "" {
 				_, err = fmt.Fprintf(totalPCL, "%s", comment)
 				if err != nil {
@@ -347,6 +368,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 		comment := addComment(node)
+		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -368,6 +390,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingKeyNode:
 		comment := addComment(node)
+		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -380,6 +403,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingValueNode:
 		comment := addComment(node)
+		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -493,7 +517,7 @@ func addComment(node ast.Node) string {
 	check for comments here in order to add to the PCL string
 	*/
 	if comment := node.GetComment(); comment != nil {
-		commentVal := strings.TrimSpace(comment.Value)
+		commentVal := strings.TrimSpace(comment.String())
 		if !strings.HasPrefix(commentVal, "#") {
 			commentVal = fmt.Sprintf("# %s", commentVal)
 		}
@@ -507,11 +531,6 @@ type Visitor struct {
 
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	tk := node.GetToken()
-
-	if comment := node.GetComment(); comment != nil {
-		comment.Prev = nil
-		comment.Next = nil
-	}
 
 	tk.Prev = nil
 	return v
