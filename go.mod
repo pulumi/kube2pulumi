@@ -3,7 +3,7 @@ module github.com/pulumi/kube2pulumi
 go 1.20
 
 require (
-	github.com/goccy/go-yaml v1.9.5
+	github.com/goccy/go-yaml v1.11.2
 	github.com/hashicorp/hcl/v2 v2.14.0
 	github.com/pulumi/pulumi-java/pkg v0.6.0
 	github.com/pulumi/pulumi/pkg/v3 v3.46.1
@@ -12,8 +12,6 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.8.1
 )
-
-replace github.com/goccy/go-yaml => github.com/goccy/go-yaml v1.8.10
 
 require (
 	cloud.google.com/go v0.107.0 // indirect
