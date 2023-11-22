@@ -237,13 +237,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	tk := node.GetToken()
 	switch n := node.(type) {
 	case *ast.LiteralNode:
-		// Grab any trailing comment, but set the comment to nil so that it doesn't get pasted into
-		// the string representation of the literal as well.
-		comment := addComment(node)
-		node.SetComment(nil)
+		multLine := n.Value.Value
 
-		multLine := node.String()
-		multLine = strings.TrimPrefix(multLine, "|")
+		// note: PCL heredoc strings must have a trialing newline
 		multLine = strings.TrimSpace(multLine)
 		// Escape any ${} interpolation sequences.
 		multLine = strings.ReplaceAll(multLine, "${", "$${")
@@ -252,6 +248,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 
+		comment := addComment(node)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -259,7 +256,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.NullNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "null\n")
 		if err != nil {
 			return err
 		}
@@ -271,7 +268,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.IntegerNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -283,7 +280,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.FloatNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -296,22 +293,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			comment := addComment(node)
-			node.SetComment(nil)
-			s := n.String()
-			// Remove leading quote if present.
-			if len(s) > 0 && (s[0] == '"' || s[0] == '\'') {
-				s = s[1:]
-			}
-			// Remove trailing quote if present unless it is escaped.
-			if len(s) > 0 && (s[len(s)-1] == '"' || s[len(s)-1] == '\'') {
-				if len(s) == 1 {
-					s = ""
-				}
-				if len(s) > 1 && s[len(s)-2] != '\\' {
-					s = s[:len(s)-1]
-				}
-			}
+			s := n.Value
+
+			// Escape any ${} interpolation sequences.
 			s = strings.ReplaceAll(s, "${", "$${")
 			strVal := fmt.Sprintf("%q%s", s, suffix)
 			_, err = fmt.Fprintf(totalPCL, "%s\n", strVal)
@@ -319,6 +303,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 			// add comments on the same line
+			comment := addComment(node)
 			if comment != "" {
 				_, err = fmt.Fprintf(totalPCL, "%s", comment)
 				if err != nil {
@@ -328,7 +313,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -342,16 +327,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
-		}
-		comment := addComment(node)
-		if comment != "" {
-			_, err = fmt.Fprintf(totalPCL, "%s", comment)
-			if err != nil {
-				return err
-			}
 		}
 	case *ast.DocumentNode:
 		comment := addComment(node)
@@ -368,7 +346,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -390,7 +367,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingKeyNode:
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -403,19 +379,19 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingValueNode:
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
 				return err
 			}
 		}
-		key := n.Key.String()
-		// trim surrounding quotations if there
-		if len(key) >= 2 {
-			if key[0] == '"' && key[len(key)-1] == '"' {
-				key = key[1 : len(key)-1]
-			}
+		var key string
+		switch nk := n.Key.(type) {
+		case ast.ScalarNode:
+			key = fmt.Sprintf("%v", nk.GetValue())
+		default:
+			return fmt.Errorf(fmt.Sprintf("unexpected key type: %T\n Please file an issue with the YAML input so we"+
+				"can take a look: https://github.com/pulumi/kube2pulumi/issues/new", n.Key))
 		}
 
 		if !hclsyntax.ValidIdentifier(key) {
@@ -516,10 +492,12 @@ func addComment(node ast.Node) string {
 	/**
 	check for comments here in order to add to the PCL string
 	*/
-	if comment := node.GetComment(); comment != nil {
-		commentVal := strings.TrimSpace(comment.String())
-		if !strings.HasPrefix(commentVal, "#") {
-			commentVal = fmt.Sprintf("# %s", commentVal)
+	if comments := node.GetComment(); comments != nil {
+		commentVal := ""
+		for _, line := range comments.Comments {
+			commentVal = fmt.Sprintf("# %s", line.Token.Value)
+			// TODO handle multi-line comments
+			break
 		}
 		return fmt.Sprintf("%s\n", commentVal)
 	}
