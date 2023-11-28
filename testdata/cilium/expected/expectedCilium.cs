@@ -344,8 +344,8 @@ return await Deployment.RunAsync(() =>
                                 "sh",
                                 "-ec",
                                 @"cp /usr/bin/cilium-mount /hostbin/cilium-mount;
-              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt ""${BIN_PATH}/cilium-mount"" $CGROUP_ROOT;
-              rm /hostbin/cilium-mount
+nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt ""${BIN_PATH}/cilium-mount"" $CGROUP_ROOT;
+rm /hostbin/cilium-mount
 ",
                             },
                             VolumeMounts = new[]
@@ -402,8 +402,8 @@ return await Deployment.RunAsync(() =>
                                 "sh",
                                 "-ec",
                                 @"cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
-              nsenter --mount=/hostproc/1/ns/mnt ""${BIN_PATH}/cilium-sysctlfix"";
-              rm /hostbin/cilium-sysctlfix
+nsenter --mount=/hostproc/1/ns/mnt ""${BIN_PATH}/cilium-sysctlfix"";
+rm /hostbin/cilium-sysctlfix
 ",
                             },
                             VolumeMounts = new[]
@@ -725,7 +725,7 @@ return await Deployment.RunAsync(() =>
                             Name = "clustermesh-secrets",
                             Projected = new Kubernetes.Types.Inputs.Core.V1.ProjectedVolumeSourceArgs
                             {
-                                DefaultMode = 400,
+                                DefaultMode = 256,
                                 Sources = new[]
                                 {
                                     new Kubernetes.Types.Inputs.Core.V1.VolumeProjectionArgs
@@ -788,7 +788,7 @@ return await Deployment.RunAsync(() =>
                             Name = "hubble-tls",
                             Projected = new Kubernetes.Types.Inputs.Core.V1.ProjectedVolumeSourceArgs
                             {
-                                DefaultMode = 400,
+                                DefaultMode = 256,
                                 Sources = new[]
                                 {
                                     new Kubernetes.Types.Inputs.Core.V1.VolumeProjectionArgs

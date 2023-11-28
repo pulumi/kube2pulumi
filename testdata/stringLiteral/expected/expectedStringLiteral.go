@@ -15,7 +15,7 @@ func main() {
 				Name: pulumi.String("myapp"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String("{\\\"uid\\\": \\\"$(datasource)\\\"}"),
+				"key": pulumi.String("{\"uid\": \"$(datasource)\"}"),
 			},
 		})
 		if err != nil {
@@ -28,7 +28,7 @@ func main() {
 				Name: pulumi.String("myapp-var"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String("{\\\"uid\\\": \\\"${datasource}\\\"}"),
+				"key": pulumi.String("{\"uid\": \"${datasource}\"}"),
 			},
 		})
 		if err != nil {
@@ -41,7 +41,7 @@ func main() {
 				Name: pulumi.String("myapp-no-end-bracket"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String("{\\\"uid\\\": \\\"${datasource\\\"}"),
+				"key": pulumi.String("{\"uid\": \"${datasource\"}"),
 			},
 		})
 		if err != nil {
@@ -54,7 +54,7 @@ func main() {
 				Name: pulumi.String("myapp-no-brackets"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String("{\\\"uid\\\": \\\"$datasource\\\""),
+				"key": pulumi.String("{\"uid\": \"$datasource\""),
 			},
 		})
 		if err != nil {

@@ -25,7 +25,7 @@ public class App {
             .metadata(ObjectMetaArgs.builder()
                 .name("myapp")
                 .build())
-            .data(Map.of("key", "{\\\"uid\\\": \\\"$(datasource)\\\"}"))
+            .data(Map.of("key", "{\"uid\": \"$(datasource)\"}"))
             .build());
 
         var myapp_varConfigMap = new ConfigMap("myapp_varConfigMap", ConfigMapArgs.builder()        
@@ -34,7 +34,7 @@ public class App {
             .metadata(ObjectMetaArgs.builder()
                 .name("myapp-var")
                 .build())
-            .data(Map.of("key", "{\\\"uid\\\": \\\"${datasource}\\\"}"))
+            .data(Map.of("key", "{\"uid\": \"${datasource}\"}"))
             .build());
 
         var myapp_no_end_bracketConfigMap = new ConfigMap("myapp_no_end_bracketConfigMap", ConfigMapArgs.builder()        
@@ -43,7 +43,7 @@ public class App {
             .metadata(ObjectMetaArgs.builder()
                 .name("myapp-no-end-bracket")
                 .build())
-            .data(Map.of("key", "{\\\"uid\\\": \\\"${datasource\\\"}"))
+            .data(Map.of("key", "{\"uid\": \"${datasource\"}"))
             .build());
 
         var myapp_no_bracketsConfigMap = new ConfigMap("myapp_no_bracketsConfigMap", ConfigMapArgs.builder()        
@@ -52,7 +52,7 @@ public class App {
             .metadata(ObjectMetaArgs.builder()
                 .name("myapp-no-brackets")
                 .build())
-            .data(Map.of("key", "{\\\"uid\\\": \\\"$datasource\\\""))
+            .data(Map.of("key", "{\"uid\": \"$datasource\""))
             .build());
 
     }

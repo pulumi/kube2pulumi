@@ -273,7 +273,7 @@ func main() {
 								Command: pulumi.StringArray{
 									pulumi.String("sh"),
 									pulumi.String("-ec"),
-									pulumi.String("cp /usr/bin/cilium-mount /hostbin/cilium-mount;\n              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-mount\" $CGROUP_ROOT;\n              rm /hostbin/cilium-mount\n"),
+									pulumi.String("cp /usr/bin/cilium-mount /hostbin/cilium-mount;\nnsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-mount\" $CGROUP_ROOT;\nrm /hostbin/cilium-mount\n"),
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									&corev1.VolumeMountArgs{
@@ -316,7 +316,7 @@ func main() {
 								Command: pulumi.StringArray{
 									pulumi.String("sh"),
 									pulumi.String("-ec"),
-									pulumi.String("cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;\n              nsenter --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-sysctlfix\";\n              rm /hostbin/cilium-sysctlfix\n"),
+									pulumi.String("cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;\nnsenter --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-sysctlfix\";\nrm /hostbin/cilium-sysctlfix\n"),
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									&corev1.VolumeMountArgs{
@@ -564,7 +564,7 @@ func main() {
 							&corev1.VolumeArgs{
 								Name: pulumi.String("clustermesh-secrets"),
 								Projected: &corev1.ProjectedVolumeSourceArgs{
-									DefaultMode: pulumi.Int(400),
+									DefaultMode: pulumi.Int(256),
 									Sources: corev1.VolumeProjectionArray{
 										&corev1.VolumeProjectionArgs{
 											Secret: &corev1.SecretProjectionArgs{
@@ -612,7 +612,7 @@ func main() {
 							&corev1.VolumeArgs{
 								Name: pulumi.String("hubble-tls"),
 								Projected: &corev1.ProjectedVolumeSourceArgs{
-									DefaultMode: pulumi.Int(400),
+									DefaultMode: pulumi.Int(256),
 									Sources: corev1.VolumeProjectionArray{
 										&corev1.VolumeProjectionArgs{
 											Secret: &corev1.SecretProjectionArgs{

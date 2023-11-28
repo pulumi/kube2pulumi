@@ -520,7 +520,7 @@ rm /hostbin/cilium-sysctlfix
                     kubernetes.core.v1.VolumeArgs(
                         name="clustermesh-secrets",
                         projected=kubernetes.core.v1.ProjectedVolumeSourceArgs(
-                            default_mode=400,
+                            default_mode=256,
                             sources=[
                                 kubernetes.core.v1.VolumeProjectionArgs(
                                     secret=kubernetes.core.v1.SecretProjectionArgs(
@@ -568,7 +568,7 @@ rm /hostbin/cilium-sysctlfix
                     kubernetes.core.v1.VolumeArgs(
                         name="hubble-tls",
                         projected=kubernetes.core.v1.ProjectedVolumeSourceArgs(
-                            default_mode=400,
+                            default_mode=256,
                             sources=[kubernetes.core.v1.VolumeProjectionArgs(
                                 secret=kubernetes.core.v1.SecretProjectionArgs(
                                     name="hubble-server-certs",
