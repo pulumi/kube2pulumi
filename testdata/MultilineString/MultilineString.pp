@@ -28,4 +28,3 @@ Corefile = <<EOF
 EOF
 }
 }
-

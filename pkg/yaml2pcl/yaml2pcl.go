@@ -505,7 +505,7 @@ func addComment(node ast.Node) string {
 	if comments := node.GetComment(); comments != nil {
 		commentVal := ""
 		for _, line := range comments.Comments {
-			commentVal = fmt.Sprintf("# %s", line.Token.Value)
+			commentVal = fmt.Sprintf("#%s", line.Token.Value)
 			// TODO handle multi-line comments
 			break
 		}
