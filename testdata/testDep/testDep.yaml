@@ -51,6 +51,7 @@ spec:
             - --staticassets
             - /shared/app
             - --repo-server
+            # Test comment
             - argocd-repo-server:8081
             - --dex-server
             - http://argocd-dex-server:5556
