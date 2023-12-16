@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -18,7 +16,7 @@ func main() {
 				Namespace: pulumi.String("kube-system"),
 			},
 			Data: pulumi.StringMap{
-				"Corefile": pulumi.String(fmt.Sprintf(`.:53 {
+				"Corefile": pulumi.String(`.:53 {
         errors
         health {
           lameduck 5s
@@ -36,7 +34,7 @@ func main() {
         reload
         loadbalance
     }STUBDOMAINS
-`)),
+`),
 			},
 		})
 		if err != nil {

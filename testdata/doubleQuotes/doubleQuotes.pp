@@ -14,10 +14,19 @@ labels = {
 name = "argocd-server"
 }
 spec = {
+selector = {
+matchLabels = {
+"app.kubernetes.io/component" = "server"
+"app.kubernetes.io/instance" = "argocd"
+"app.kubernetes.io/name" = "argocd-server"
+}
+}
 template = {
 spec = {
 containers = [
 {
+name = "argocd-server"
+image = "argoproj/argocd:v1.6.1"
 readinessProbe = {
 httpGet = {
 port = 8080
