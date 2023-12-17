@@ -14,6 +14,8 @@ import (
 	"github.com/goccy/go-yaml/parser"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ConvertFile returns a string conversion of the input YAML
@@ -83,8 +85,12 @@ func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 		if doc == nil || doc.Body == nil {
 			continue
 		}
-		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		header, diag := getHeader(baseNodes)
+
+		baseNodes, ok := doc.Body.(*ast.MappingNode)
+		if !ok {
+			return "", hcl.Diagnostics{}, fmt.Errorf("unable to parse yaml ast")
+		}
+		header, diag := getHeader(baseNodes.Values)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
 		if diag.Severity == hcl.DiagnosticSeverity(1) {
 			diagnostics = diagnostics.Append(&diag)
@@ -116,21 +122,12 @@ func trimQuotes(s string) string {
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
+func getHeader(nodes []*ast.MappingValueNode) (string, hcl.Diagnostic) {
 	var apiVersion string
 	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if mapValNode.Key.String() == "apiVersion" {
-				val, ok := mapValNode.Value.(*ast.StringNode)
-				if !ok {
-					return "", hcl.Diagnostic{
-						Severity: hcl.DiagnosticSeverity(1),
-						Summary:  "malformed yaml: apiVersion value is wrong type",
-						Detail:   "apiVersion field for the resource needs to be a string",
-					}
-				}
-
-				apiVersion = trimQuotes(val.Value)
+		if node.GetPath() == "$.apiVersion" {
+			if valStr, ok := getStringMapNodeVal(node); ok {
+				apiVersion = trimQuotes(valStr)
 				break
 			}
 		}
@@ -178,58 +175,83 @@ func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	return header, hcl.Diagnostic{}
 }
 
-// resourceName computes a name for the resource based on the namespace, name, and kind.
-func resourceName(nodes []ast.Node) (string, string) {
-	var kind, name, ns string
-	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if len(kind) == 0 && mapValNode.Key.String() == "kind" {
-				val, ok := mapValNode.Value.(*ast.StringNode)
-				if !ok {
-					return "", ""
-				}
-				kind = val.Value
+// getResourceKNN iteratively passes through the Yaml ast nodes to obtain the
+// resource's kind, name and namespace using DFS.
+func getResourceKNN(nodes []*ast.MappingValueNode) (kind, name, ns string) {
+	// Clone nodes slice so we can traverse with DFS without modifying object in-place.
+	// We need to do this because we need to walk to the .metadata.{name,namespace} values
+	// without modifying the original nodes slice and removing it from future traversals.
+	stack := make([]*ast.MappingValueNode, len(nodes))
+	copy(stack, nodes)
+
+	// DFS search the required properties.
+	for len(stack) != 0 {
+		currNode := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		switch currNode.GetPath() {
+		case "$.kind":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				kind = valStr
+			}
+
+		case "$.metadata.name":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				name = valStr
+			}
+
+		case "$.metadata.namespace":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				ns = valStr
+			}
+
+		case "$.metadata":
+			// Add nested metadata nodes to our search stack, so we can walk to
+			// .metadata.{name,namespace} values.
+			// Add all child mapping values if the metadata block is a map of multiple map nodes, eg:
+			// .metadata.{.name,.namespace.labels}.
+			if nestedMappingNode, ok := currNode.Value.(*ast.MappingNode); ok {
+				stack = append(stack, nestedMappingNode.Values...)
 				continue
 			}
-			if mapValNode.Key.String() == "metadata" {
-				if mapValNode.Value.Type() == ast.StringType {
-					val, ok := mapValNode.Value.(*ast.StringNode)
-					if !ok {
-						return "", ""
-					}
-					name = val.Value
-					continue
-				} else {
-					for _, inner := range ast.Filter(ast.MappingValueType, node) {
-						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
-							if innerMvNode.Key.String() == "name" {
-								val, ok := innerMvNode.Value.(*ast.StringNode)
-								if !ok {
-									return "", ""
-								}
-								name = val.Value
-							} else if innerMvNode.Key.String() == "namespace" {
-								val, ok := innerMvNode.Value.(*ast.StringNode)
-								if !ok {
-									return "", ""
-								}
-								ns = val.Value
-							}
-						}
-					}
-				}
+
+			// The child node is a singular mapping value node if the metadata block only contains
+			// one map item, eg. .metadata.name.
+			if nestedMappingValueNode, ok := currNode.Value.(*ast.MappingValueNode); ok {
+				stack = append(stack, nestedMappingValueNode)
 			}
 		}
-		if len(ns) > 0 && len(name) > 0 {
-			break
+
+		// Return early if we have all 3 information.
+		if kind != "" && name != "" && ns != "" {
+			return
 		}
 	}
 
+	// Note: we can also have just kind and name, as an empty namespace means the default ns.
+	return
+}
+
+// getStringMapNodeVal gets the string value of a map of string if the map key given
+// matches the node map key.
+func getStringMapNodeVal(mapValNode *ast.MappingValueNode) (string, bool) {
+	nodeVal, ok := mapValNode.Value.(*ast.StringNode)
+	if !ok {
+		return "", false // Not a string value, skip.
+	}
+
+	return nodeVal.Value, true
+}
+
+// resourceName computes a name for the resource based on the namespace, name, and kind.
+func resourceName(nodes []*ast.MappingValueNode) (string, string) {
+	kind, name, ns := getResourceKNN(nodes)
 	name = strings.ReplaceAll(strings.ToLower(name), "-", "_")
 	ns = strings.ReplaceAll(strings.ToLower(ns), "-", "_")
 
 	if len(ns) > 0 {
-		name = strings.ToUpper(string(name[0])) + name[1:]
+		// Capitalize the object's name if namespace is defined.
+		name = cases.Title(language.English, cases.Compact).String(name)
 		return fmt.Sprintf("%s%s%s", ns, name, kind), kind
 	}
 
@@ -238,10 +260,6 @@ func resourceName(nodes []ast.Node) (string, string) {
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
 func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) error {
-	if v := v.Visit(node); v == nil {
-		return nil
-	}
-
 	var err error
 
 	tk := node.GetToken()
