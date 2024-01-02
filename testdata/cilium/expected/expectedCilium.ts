@@ -248,7 +248,7 @@ const defaultCiliumDaemonSet = new kubernetes.apps.v1.DaemonSet("defaultCiliumDa
                             "sh",
                             "-ec",
                             `cp /usr/bin/cilium-mount /hostbin/cilium-mount;
-              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
+              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "\${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
               rm /hostbin/cilium-mount
 `,
                         ],
@@ -290,7 +290,7 @@ const defaultCiliumDaemonSet = new kubernetes.apps.v1.DaemonSet("defaultCiliumDa
                             "sh",
                             "-ec",
                             `cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
-              nsenter --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-sysctlfix";
+              nsenter --mount=/hostproc/1/ns/mnt "\${BIN_PATH}/cilium-sysctlfix";
               rm /hostbin/cilium-sysctlfix
 `,
                         ],

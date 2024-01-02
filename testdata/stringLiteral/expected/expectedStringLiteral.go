@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -17,7 +15,7 @@ func main() {
 				Name: pulumi.String("myapp"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"$(datasource)\\\"}")),
+				"key": pulumi.String("{\\\"uid\\\": \\\"$(datasource)\\\"}"),
 			},
 		})
 		if err != nil {
@@ -30,7 +28,7 @@ func main() {
 				Name: pulumi.String("myapp-var"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"${datasource}\\\"}")),
+				"key": pulumi.String("{\\\"uid\\\": \\\"${datasource}\\\"}"),
 			},
 		})
 		if err != nil {
@@ -43,7 +41,7 @@ func main() {
 				Name: pulumi.String("myapp-no-end-bracket"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"${datasource\\\"}")),
+				"key": pulumi.String("{\\\"uid\\\": \\\"${datasource\\\"}"),
 			},
 		})
 		if err != nil {
@@ -56,7 +54,7 @@ func main() {
 				Name: pulumi.String("myapp-no-brackets"),
 			},
 			Data: pulumi.StringMap{
-				"key": pulumi.String(fmt.Sprintf("{\\\"uid\\\": \\\"$datasource\\\"")),
+				"key": pulumi.String("{\\\"uid\\\": \\\"$datasource\\\""),
 			},
 		})
 		if err != nil {

@@ -6,8 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/pulumi/kube2pulumi/pkg/testutil"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/pulumi/kube2pulumi/pkg/testutil"
 )
 
 // GENERAL TESTS
@@ -178,6 +179,7 @@ func TestNamespaceDotNet(t *testing.T) {
 	assertion := assert.New(t)
 
 	csExpected := `using System.Collections.Generic;
+using System.Linq;
 using Pulumi;
 using Kubernetes = Pulumi.Kubernetes;
 
