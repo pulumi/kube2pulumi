@@ -11,9 +11,13 @@ metadata:
     "helm.sh/chart": argo-cd-2.5.4
   name: argocd-server
 spec:
+  selector:
+    matchLabels:
+      app: argocd
   template:
     spec:
       containers:
-        - readinessProbe:
+        - name: testcontainer
+          readinessProbe:
             httpGet:
               port: 8080

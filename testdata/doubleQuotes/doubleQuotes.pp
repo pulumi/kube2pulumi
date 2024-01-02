@@ -14,10 +14,16 @@ labels = {
 name = "argocd-server"
 }
 spec = {
+selector = {
+matchLabels = {
+app = "argocd"
+}
+}
 template = {
 spec = {
 containers = [
 {
+name = "testcontainer"
 readinessProbe = {
 httpGet = {
 port = 8080

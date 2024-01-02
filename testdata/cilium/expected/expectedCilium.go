@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	appsv1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/apps/v1"
 	corev1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/core/v1"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v4/go/kubernetes/meta/v1"
@@ -275,7 +273,7 @@ func main() {
 								Command: pulumi.StringArray{
 									pulumi.String("sh"),
 									pulumi.String("-ec"),
-									pulumi.String(fmt.Sprintf("cp /usr/bin/cilium-mount /hostbin/cilium-mount;\n              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-mount\" $CGROUP_ROOT;\n              rm /hostbin/cilium-mount\n")),
+									pulumi.String("cp /usr/bin/cilium-mount /hostbin/cilium-mount;\n              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-mount\" $CGROUP_ROOT;\n              rm /hostbin/cilium-mount\n"),
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									&corev1.VolumeMountArgs{
@@ -318,7 +316,7 @@ func main() {
 								Command: pulumi.StringArray{
 									pulumi.String("sh"),
 									pulumi.String("-ec"),
-									pulumi.String(fmt.Sprintf("cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;\n              nsenter --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-sysctlfix\";\n              rm /hostbin/cilium-sysctlfix\n")),
+									pulumi.String("cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;\n              nsenter --mount=/hostproc/1/ns/mnt \"${BIN_PATH}/cilium-sysctlfix\";\n              rm /hostbin/cilium-sysctlfix\n"),
 								},
 								VolumeMounts: corev1.VolumeMountArray{
 									&corev1.VolumeMountArgs{
