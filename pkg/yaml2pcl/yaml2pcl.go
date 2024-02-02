@@ -14,6 +14,8 @@ import (
 	"github.com/goccy/go-yaml/parser"
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ConvertFile returns a string conversion of the input YAML
@@ -83,8 +85,12 @@ func convert(testFiles ast.File) (string, hcl.Diagnostics, error) {
 		if doc == nil || doc.Body == nil {
 			continue
 		}
-		baseNodes := ast.Filter(ast.MappingValueType, doc.Body)
-		header, diag := getHeader(baseNodes)
+
+		baseNodes, ok := doc.Body.(*ast.MappingNode)
+		if !ok {
+			return "", hcl.Diagnostics{}, fmt.Errorf("unable to parse yaml ast")
+		}
+		header, diag := getHeader(baseNodes.Values)
 		// check diagnostics here and break at malformed resource then continue for other resources defined
 		if diag.Severity == hcl.DiagnosticSeverity(1) {
 			diagnostics = diagnostics.Append(&diag)
@@ -116,15 +122,12 @@ func trimQuotes(s string) string {
 }
 
 // resource <metadata/name> “kubernetes:<apiVersion>:<kind>”
-func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
+func getHeader(nodes []*ast.MappingValueNode) (string, hcl.Diagnostic) {
 	var apiVersion string
 	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if mapValNode.Key.String() == "apiVersion" {
-				comment := mapValNode.Value.GetComment()
-				mapValNode.Value.SetComment(nil)
-				apiVersion = trimQuotes(mapValNode.Value.String())
-				mapValNode.Value.SetComment(comment)
+		if node.GetPath() == "$.apiVersion" {
+			if valStr, ok := getStringMapNodeVal(node); ok {
+				apiVersion = trimQuotes(valStr)
 				break
 			}
 		}
@@ -172,54 +175,83 @@ func getHeader(nodes []ast.Node) (string, hcl.Diagnostic) {
 	return header, hcl.Diagnostic{}
 }
 
-// resourceName computes a name for the resource based on the namespace, name, and kind.
-func resourceName(nodes []ast.Node) (string, string) {
-	var kind, name, ns string
-	for _, node := range nodes {
-		if mapValNode, ok := node.(*ast.MappingValueNode); ok {
-			if len(kind) == 0 && mapValNode.Key.String() == "kind" {
-				comment := mapValNode.Value.GetComment()
-				mapValNode.Value.SetComment(nil)
-				kind = mapValNode.Value.String()
-				mapValNode.Value.SetComment(comment)
+// getResourceKNN iteratively passes through the Yaml ast nodes to obtain the
+// resource's kind, name and namespace using DFS.
+func getResourceKNN(nodes []*ast.MappingValueNode) (kind, name, ns string) {
+	// Clone nodes slice so we can traverse with DFS without modifying object in-place.
+	// We need to do this because we need to walk to the .metadata.{name,namespace} values
+	// without modifying the original nodes slice and removing it from future traversals.
+	stack := make([]*ast.MappingValueNode, len(nodes))
+	copy(stack, nodes)
+
+	// DFS search the required properties.
+	for len(stack) != 0 {
+		currNode := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		switch currNode.GetPath() {
+		case "$.kind":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				kind = valStr
+			}
+
+		case "$.metadata.name":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				name = valStr
+			}
+
+		case "$.metadata.namespace":
+			if valStr, ok := getStringMapNodeVal(currNode); ok {
+				ns = valStr
+			}
+
+		case "$.metadata":
+			// Add nested metadata nodes to our search stack, so we can walk to
+			// .metadata.{name,namespace} values.
+			// Add all child mapping values if the metadata block is a map of multiple map nodes, eg:
+			// .metadata.{.name,.namespace.labels}.
+			if nestedMappingNode, ok := currNode.Value.(*ast.MappingNode); ok {
+				stack = append(stack, nestedMappingNode.Values...)
 				continue
 			}
-			if mapValNode.Key.String() == "metadata" {
-				if mapValNode.Value.Type() == ast.StringType {
-					comment := mapValNode.Value.GetComment()
-					mapValNode.Value.SetComment(nil)
-					name = mapValNode.Value.String()
-					mapValNode.Value.SetComment(comment)
-					continue
-				} else {
-					for _, inner := range ast.Filter(ast.MappingValueType, node) {
-						if innerMvNode, ok := inner.(*ast.MappingValueNode); ok {
-							if innerMvNode.Key.String() == "name" {
-								comment := innerMvNode.Value.GetComment()
-								innerMvNode.Value.SetComment(nil)
-								name = innerMvNode.Value.String()
-								innerMvNode.Value.SetComment(comment)
-							} else if innerMvNode.Key.String() == "namespace" {
-								comment := innerMvNode.Value.GetComment()
-								innerMvNode.Value.SetComment(nil)
-								ns = innerMvNode.Value.String()
-								innerMvNode.Value.SetComment(comment)
-							}
-						}
-					}
-				}
+
+			// The child node is a singular mapping value node if the metadata block only contains
+			// one map item, eg. .metadata.name.
+			if nestedMappingValueNode, ok := currNode.Value.(*ast.MappingValueNode); ok {
+				stack = append(stack, nestedMappingValueNode)
 			}
 		}
-		if len(ns) > 0 && len(name) > 0 {
-			break
+
+		// Return early if we have all 3 information.
+		if kind != "" && name != "" && ns != "" {
+			return
 		}
 	}
 
+	// Note: we can also have just kind and name, as an empty namespace means the default ns.
+	return
+}
+
+// getStringMapNodeVal gets the string value of a map of string if the map key given
+// matches the node map key.
+func getStringMapNodeVal(mapValNode *ast.MappingValueNode) (string, bool) {
+	nodeVal, ok := mapValNode.Value.(*ast.StringNode)
+	if !ok {
+		return "", false // Not a string value, skip.
+	}
+
+	return nodeVal.Value, true
+}
+
+// resourceName computes a name for the resource based on the namespace, name, and kind.
+func resourceName(nodes []*ast.MappingValueNode) (string, string) {
+	kind, name, ns := getResourceKNN(nodes)
 	name = strings.ReplaceAll(strings.ToLower(name), "-", "_")
 	ns = strings.ReplaceAll(strings.ToLower(ns), "-", "_")
 
 	if len(ns) > 0 {
-		name = strings.ToUpper(string(name[0])) + name[1:]
+		// Capitalize the object's name if namespace is defined.
+		name = cases.Title(language.English, cases.Compact).String(name)
 		return fmt.Sprintf("%s%s%s", ns, name, kind), kind
 	}
 
@@ -228,22 +260,14 @@ func resourceName(nodes []ast.Node) (string, string) {
 
 // walkToPCL traverses an AST in depth-first order and converts the corresponding PCL code
 func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) error {
-	if v := v.Visit(node); v == nil {
-		return nil
-	}
-
 	var err error
 
 	tk := node.GetToken()
 	switch n := node.(type) {
 	case *ast.LiteralNode:
-		// Grab any trailing comment, but set the comment to nil so that it doesn't get pasted into
-		// the string representation of the literal as well.
-		comment := addComment(node)
-		node.SetComment(nil)
+		multLine := n.Value.Value
 
-		multLine := node.String()
-		multLine = strings.TrimPrefix(multLine, "|")
+		// note: PCL heredoc strings must have a trialing newline
 		multLine = strings.TrimSpace(multLine)
 		// Escape any ${} interpolation sequences.
 		multLine = strings.ReplaceAll(multLine, "${", "$${")
@@ -252,6 +276,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			return err
 		}
 
+		comment := addComment(node)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -259,7 +284,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.NullNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "null\n")
 		if err != nil {
 			return err
 		}
@@ -271,7 +296,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.IntegerNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -283,7 +308,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 			}
 		}
 	case *ast.FloatNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -296,22 +321,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.StringNode:
 		if tk.Next == nil || tk.Next.Value != ":" {
-			comment := addComment(node)
-			node.SetComment(nil)
-			s := n.String()
-			// Remove leading quote if present.
-			if len(s) > 0 && (s[0] == '"' || s[0] == '\'') {
-				s = s[1:]
-			}
-			// Remove trailing quote if present unless it is escaped.
-			if len(s) > 0 && (s[len(s)-1] == '"' || s[len(s)-1] == '\'') {
-				if len(s) == 1 {
-					s = ""
-				}
-				if len(s) > 1 && s[len(s)-2] != '\\' {
-					s = s[:len(s)-1]
-				}
-			}
+			s := n.Value
+
+			// Escape any ${} interpolation sequences.
 			s = strings.ReplaceAll(s, "${", "$${")
 			strVal := fmt.Sprintf("%q%s", s, suffix)
 			_, err = fmt.Fprintf(totalPCL, "%s\n", strVal)
@@ -319,6 +331,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 				return err
 			}
 			// add comments on the same line
+			comment := addComment(node)
 			if comment != "" {
 				_, err = fmt.Fprintf(totalPCL, "%s", comment)
 				if err != nil {
@@ -328,7 +341,7 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MergeKeyNode:
 	case *ast.BoolNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		_, err = fmt.Fprintf(totalPCL, "%v\n", n.Value)
 		if err != nil {
 			return err
 		}
@@ -342,16 +355,9 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.InfinityNode:
 	case *ast.NanNode:
 	case *ast.TagNode:
-		_, err = fmt.Fprintf(totalPCL, "%s\n", node)
+		err = walkToPCL(v, n.Value, totalPCL, "")
 		if err != nil {
 			return err
-		}
-		comment := addComment(node)
-		if comment != "" {
-			_, err = fmt.Fprintf(totalPCL, "%s", comment)
-			if err != nil {
-				return err
-			}
 		}
 	case *ast.DocumentNode:
 		comment := addComment(node)
@@ -368,7 +374,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 	case *ast.MappingNode:
 		_, err = fmt.Fprintf(totalPCL, "%s\n", "{")
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -390,7 +395,6 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingKeyNode:
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
@@ -403,19 +407,19 @@ func walkToPCL(v Visitor, node ast.Node, totalPCL io.Writer, suffix string) erro
 		}
 	case *ast.MappingValueNode:
 		comment := addComment(node)
-		node.SetComment(nil)
 		if comment != "" {
 			_, err = fmt.Fprintf(totalPCL, "%s", comment)
 			if err != nil {
 				return err
 			}
 		}
-		key := n.Key.String()
-		// trim surrounding quotations if there
-		if len(key) >= 2 {
-			if key[0] == '"' && key[len(key)-1] == '"' {
-				key = key[1 : len(key)-1]
-			}
+		var key string
+		switch nk := n.Key.(type) {
+		case ast.ScalarNode:
+			key = fmt.Sprintf("%v", nk.GetValue())
+		default:
+			return fmt.Errorf(fmt.Sprintf("unexpected key type: %T\n Please file an issue with the YAML input so we"+
+				"can take a look: https://github.com/pulumi/kube2pulumi/issues/new", n.Key))
 		}
 
 		if !hclsyntax.ValidIdentifier(key) {
@@ -516,10 +520,12 @@ func addComment(node ast.Node) string {
 	/**
 	check for comments here in order to add to the PCL string
 	*/
-	if comment := node.GetComment(); comment != nil {
-		commentVal := strings.TrimSpace(comment.String())
-		if !strings.HasPrefix(commentVal, "#") {
-			commentVal = fmt.Sprintf("# %s", commentVal)
+	if comments := node.GetComment(); comments != nil {
+		commentVal := ""
+		for _, line := range comments.Comments {
+			commentVal = fmt.Sprintf("#%s", line.Token.Value)
+			// TODO handle multi-line comments
+			break
 		}
 		return fmt.Sprintf("%s\n", commentVal)
 	}

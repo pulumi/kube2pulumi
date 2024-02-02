@@ -105,9 +105,10 @@ func convertPulumi(ppFile *os.File, newFileName string, outputLanguage string) (
 			return "", err
 		}
 	}
-	program, diags, err := pcl.BindProgram(parser.Files)
+	// Enable pcl.AllowMissingProperties to allow converting Kubernetes objects that don't
+	// specify all required fields.
+	program, diags, err := pcl.BindProgram(parser.Files, pcl.AllowMissingProperties)
 	if err != nil {
-		log.Print("failed to bind program: ")
 		return "", err
 	}
 	if len(diags) != 0 {

@@ -10,23 +10,23 @@ const kube_systemCorednsConfigMap = new kubernetes.core.v1.ConfigMap("kube_syste
     },
     data: {
         Corefile: `.:53 {
-        errors
-        health {
-          lameduck 5s
-        }
-        ready
-        kubernetes CLUSTER_DOMAIN REVERSE_CIDRS {
-          fallthrough in-addr.arpa ip6.arpa
-        }
-        prometheus :9153
-        forward . UPSTREAMNAMESERVER {
-          max_concurrent 1000
-        }
-        cache 30
-        loop
-        reload
-        loadbalance
-    }STUBDOMAINS
+    errors
+    health {
+      lameduck 5s
+    }
+    ready
+    kubernetes CLUSTER_DOMAIN REVERSE_CIDRS {
+      fallthrough in-addr.arpa ip6.arpa
+    }
+    prometheus :9153
+    forward . UPSTREAMNAMESERVER {
+      max_concurrent 1000
+    }
+    cache 30
+    loop
+    reload
+    loadbalance
+}STUBDOMAINS
 `,
     },
 });

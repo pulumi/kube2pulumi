@@ -8,7 +8,7 @@ myapp_config_map = kubernetes.core.v1.ConfigMap("myappConfigMap",
         name="myapp",
     ),
     data={
-        "key": "{\\\"uid\\\": \\\"$(datasource)\\\"}",
+        "key": "{\"uid\": \"$(datasource)\"}",
     })
 myapp_var_config_map = kubernetes.core.v1.ConfigMap("myapp_varConfigMap",
     api_version="v1",
@@ -17,7 +17,7 @@ myapp_var_config_map = kubernetes.core.v1.ConfigMap("myapp_varConfigMap",
         name="myapp-var",
     ),
     data={
-        "key": "{\\\"uid\\\": \\\"${datasource}\\\"}",
+        "key": "{\"uid\": \"${datasource}\"}",
     })
 myapp_no_end_bracket_config_map = kubernetes.core.v1.ConfigMap("myapp_no_end_bracketConfigMap",
     api_version="v1",
@@ -26,7 +26,7 @@ myapp_no_end_bracket_config_map = kubernetes.core.v1.ConfigMap("myapp_no_end_bra
         name="myapp-no-end-bracket",
     ),
     data={
-        "key": "{\\\"uid\\\": \\\"${datasource\\\"}",
+        "key": "{\"uid\": \"${datasource\"}",
     })
 myapp_no_brackets_config_map = kubernetes.core.v1.ConfigMap("myapp_no_bracketsConfigMap",
     api_version="v1",
@@ -35,5 +35,5 @@ myapp_no_brackets_config_map = kubernetes.core.v1.ConfigMap("myapp_no_bracketsCo
         name="myapp-no-brackets",
     ),
     data={
-        "key": "{\\\"uid\\\": \\\"$datasource\\\"",
+        "key": "{\"uid\": \"$datasource\"",
     })

@@ -267,8 +267,8 @@ public class App {
                                     "-ec",
                                     """
 cp /usr/bin/cilium-mount /hostbin/cilium-mount;
-              nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
-              rm /hostbin/cilium-mount
+nsenter --cgroup=/hostproc/1/ns/cgroup --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-mount" $CGROUP_ROOT;
+rm /hostbin/cilium-mount
                                     """)
                                 .volumeMounts(                                
                                     VolumeMountArgs.builder()
@@ -307,8 +307,8 @@ cp /usr/bin/cilium-mount /hostbin/cilium-mount;
                                     "-ec",
                                     """
 cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
-              nsenter --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-sysctlfix";
-              rm /hostbin/cilium-sysctlfix
+nsenter --mount=/hostproc/1/ns/mnt "${BIN_PATH}/cilium-sysctlfix";
+rm /hostbin/cilium-sysctlfix
                                     """)
                                 .volumeMounts(                                
                                     VolumeMountArgs.builder()
@@ -525,7 +525,7 @@ cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
                             VolumeArgs.builder()
                                 .name("clustermesh-secrets")
                                 .projected(ProjectedVolumeSourceArgs.builder()
-                                    .defaultMode(400)
+                                    .defaultMode(256)
                                     .sources(                                    
                                         VolumeProjectionArgs.builder()
                                             .secret(SecretProjectionArgs.builder()
@@ -571,7 +571,7 @@ cp /usr/bin/cilium-sysctlfix /hostbin/cilium-sysctlfix;
                             VolumeArgs.builder()
                                 .name("hubble-tls")
                                 .projected(ProjectedVolumeSourceArgs.builder()
-                                    .defaultMode(400)
+                                    .defaultMode(256)
                                     .sources(VolumeProjectionArgs.builder()
                                         .secret(SecretProjectionArgs.builder()
                                             .name("hubble-server-certs")
