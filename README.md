@@ -1,9 +1,16 @@
+# ⚠️ This repository is deprecated.
+
+kube2pulumi has been deprecated and is no longer maintained. Please note that this repository is no longer actively developed or supported.
+
+Development for this project has moved to [pulumi/pulumi-converter-kubernetes](https://github.com/pulumi/pulumi-converter-kubernetes). If you are looking to convert Kubernetes manifests to Pulumi programs, we **strongly recommend** you utilize the new converter plugin. You can find detailed instructions on using the new converter plugin [here](https://www.pulumi.com/docs/using-pulumi/adopting-pulumi/migrating-to-pulumi/from-kubernetes/#converting-kubernetes-yaml).
+
+Many of the long-requested features and bug fixes have been integrated into the newer converter plugin, making it more versatile and reliable.
+
+---
+
 # kube2pulumi
 
 Convert Kubernetes YAML to Pulumi programs in Go, TypeScript, Python, C# and Java. Improve your Kubernetes development experience by taking advantage of strong types, compilation errors, full IDE support for features like autocomplete. Declare and manage the infrastructure in any cloud in the same program that manages your Kubernetes resources.
-
-## Live Demo
-Check out the [kube2pulumi web app](https://www.pulumi.com/kube2pulumi/) to see `kube2pulumi` in action in your browser.
 
 ## Prerequisites
 1. [Pulumi CLI](https://pulumi.io/quickstart/install.html)
