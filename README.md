@@ -1,6 +1,5 @@
-# ⚠️ This repository is deprecated.
+# 📌 Please try the new Kubernetes converter plugin! 📌
 
-kube2pulumi has been deprecated and is no longer maintained. Please note that this repository is no longer actively developed or supported.
 
 Development for this project has moved to [pulumi/pulumi-converter-kubernetes](https://github.com/pulumi/pulumi-converter-kubernetes). If you are looking to convert Kubernetes manifests to Pulumi programs, we **strongly recommend** you utilize the new converter plugin. You can find detailed instructions on using the new converter plugin [here](https://www.pulumi.com/docs/using-pulumi/adopting-pulumi/migrating-to-pulumi/from-kubernetes/#converting-kubernetes-yaml).
 
